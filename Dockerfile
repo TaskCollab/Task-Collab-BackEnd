@@ -5,7 +5,7 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 # Copy the Spring Boot jar file into the container
-COPY target/Task-Collab-0.0.1-SNAPSHOT.jar Task-Collab-0.0.1-SNAPSHOT.jar
+COPY target/app.jar app.jar
 
 # Expose the port your Spring Boot app runs on
 EXPOSE 8080
