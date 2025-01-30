@@ -10,3 +10,7 @@ Task Collaboration Project for COSC 310
 
 ![Alt text](Media\310-UserCase.png?raw=true "Data Flow Diagram")
 
+## UML Class Diagram
+
+
+![Alt text](Media\UMLDiagram1.png?raw=true "Data Flow Diagram")
