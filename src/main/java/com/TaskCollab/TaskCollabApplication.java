@@ -1,9 +1,13 @@
-package com.TaskCollab.Task.Collab;
+package com.TaskCollab;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "com.TaskCollab")
+@EntityScan("com.TaskCollab.entity")
+@EnableJpaRepositories(basePackages = "com.TaskCollab.dao")
 public class TaskCollabApplication {
 
 	public static void main(String[] args) {

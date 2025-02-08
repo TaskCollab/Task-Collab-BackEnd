@@ -13,21 +13,35 @@ DROP TABLE IF EXISTS Message;
 DROP TABLE IF EXISTS Notification;
 DROP TABLE IF EXISTS Eventlog;
 
+
+CREATE TABLE roles (
+   roleId INT NOT NULL PRIMARY KEY,
+   roleName NVARCHAR(255) NOT NULL,
+   create BIT NOT NULL,
+   read BIT NOT NULL,
+   delete BIT NOT NULL,
+   update BIT NOT NULL
+);
+
+
 CREATE TABLE Users (
    userId BIGINT NOT NULL PRIMARY KEY,
    username NVARCHAR(255) NOT NULL,
    password NVARCHAR(255) NOT NULL,
-   isAdmin BIT NOT NULL
+   roleId INT NOT NULL, 
+   isAdmin BIT 
+   FOREIGN KEY (roleId) REFERENCES roles(roleId) ON DELETE SET NULL
 );
 
-CREATE TABLE roles (
-   roleId INT NOT NULL PRIMARY KEY,
-   rolename NVARCHAR(255) NOT NULL,
-   [create] BIT NOT NULL,
-   [read] BIT NOT NULL,
-   [delete] BIT NOT NULL,
-   [update] BIT NOT NULL
+CREATE TABLE user_roles (
+    user_id INT NOT NULL,             
+    role_id INT NOT NULL,             
+    PRIMARY KEY (user_id, role_id),   
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,   
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE    
 );
+
+
 
 CREATE TABLE Task (
    taskId BIGINT NOT NULL PRIMARY KEY,
