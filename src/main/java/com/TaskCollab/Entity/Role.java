@@ -1,22 +1,31 @@
 package com.TaskCollab.Entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "roles")
 public class Role {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer roleId;
-    private String roleName;
-    private boolean create; 
-    private boolean read;
-    private boolean delete;
-    private boolean update;
-    
 
+    @Column(nullable = false, unique = true)
+    private String roleName;
+
+    @Column(nullable = false)
+    private boolean createPermission;
+
+    @Column(nullable = false)
+    private boolean readPermission;
+
+    @Column(nullable = false)
+    private boolean deletePermission;
+
+    @Column(nullable = false)
+    private boolean updatePermission;
+
+    // Getters and Setters (REQUIRED for Hibernate)
     public Integer getRoleId() {
         return roleId;
     }
@@ -33,36 +42,38 @@ public class Role {
         this.roleName = roleName;
     }
 
-    public boolean isCreate() {
-        return create;
+
+    // Getter methods (Fix for isCreate(), isRead(), isUpdate(), isDelete())
+    public boolean isCreatePermission() {
+        return createPermission;
     }
 
-    public void setCreate(boolean create) {
-        this.create = create;
+    public boolean isReadPermission() {
+        return readPermission;
     }
 
-    public boolean isRead() {
-        return read;
+    public boolean isDeletePermission() {
+        return deletePermission;
     }
 
-    public void setRead(boolean read) {
-        this.read = read;
+    public boolean isUpdatePermission() {
+        return updatePermission;
     }
 
-    public boolean isUpdate() {
-        return update;
+    // Setters
+    public void setCreatePermission(boolean createPermission) {
+        this.createPermission = createPermission;
     }
 
-    public void setUpdate(boolean update) {
-        this.update = update;
+    public void setReadPermission(boolean readPermission) {
+        this.readPermission = readPermission;
     }
 
-    public boolean isDelete() {
-        return delete;
+    public void setDeletePermission(boolean deletePermission) {
+        this.deletePermission = deletePermission;
     }
 
-    public void setDelete(boolean delete) {
-        this.delete = delete;
+    public void setUpdatePermission(boolean updatePermission) {
+        this.updatePermission = updatePermission;
     }
-
 }
