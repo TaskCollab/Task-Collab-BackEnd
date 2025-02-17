@@ -1,4 +1,4 @@
-package com.taskcollab.database;
+package com.TaskCollab.database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
