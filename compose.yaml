@@ -7,6 +7,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080" 
+    expose:
+      - "8080"
     volumes:
       - ./target/app.jar:/app/app.jar           
   

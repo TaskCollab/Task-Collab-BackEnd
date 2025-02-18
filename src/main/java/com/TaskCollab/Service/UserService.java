@@ -11,7 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.TaskCollab.Entity.Role;
-import com.TaskCollab.Entity.User;
+import com.TaskCollab.Entity.Users;
 import com.TaskCollab.dao.UserRepository;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -23,18 +23,21 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) {
-        User user = userRepository.findByUsername(username)
+        Users user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found!"));
 
         // Combine role name and CRUD permissions
         Set<GrantedAuthority> authorities = new HashSet<>();
-        for (Role role : user.getRoles()) {
+        Set<Role> roles = user.getRole() == null ? new HashSet<>() : new HashSet<>(Set.of(user.getRole()));
+        for (Role role : roles) {  
             authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getRoleName())); 
-            if (role.isCreate()) authorities.add(new SimpleGrantedAuthority("CREATE"));
-            if (role.isRead()) authorities.add(new SimpleGrantedAuthority("READ"));
-            if (role.isUpdate()) authorities.add(new SimpleGrantedAuthority("UPDATE"));
-            if (role.isDelete()) authorities.add(new SimpleGrantedAuthority("DELETE"));
+        
+            if (role.isCreatePermission()) authorities.add(new SimpleGrantedAuthority("CREATE"));
+            if (role.isReadPermission()) authorities.add(new SimpleGrantedAuthority("READ"));
+            if (role.isUpdatePermission()) authorities.add(new SimpleGrantedAuthority("UPDATE"));
+            if (role.isDeletePermission()) authorities.add(new SimpleGrantedAuthority("DELETE"));
         }
+        
 
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),

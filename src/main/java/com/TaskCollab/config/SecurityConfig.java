@@ -29,28 +29,27 @@ public class SecurityConfig {
 
     private final UserService userDetailsService;
     private final JwtUtils jwtUtils;
+    private final JwtAuthFilter jwtAuthFilter;
 
     // ✅ Constructor Injection
-    public SecurityConfig(UserService userDetailsService, JwtUtils jwtUtils) {
+    public SecurityConfig(UserService userDetailsService, JwtUtils jwtUtils, JwtAuthFilter jwtAuthFilter) {
         this.userDetailsService = userDetailsService;
         this.jwtUtils = jwtUtils;
+        this.jwtAuthFilter = jwtAuthFilter;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless APIs
-            .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enable CORS
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Stateless sessions for JWT
-            )
+        return http
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configure(http)) // This enables CORS
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/login", "/api/auth/register").permitAll() // Public endpoints
-                .anyRequest().authenticated() // Secure all other endpoints
+                .requestMatchers("/api/auth/**").permitAll()
+                .anyRequest().authenticated()
             )
-            .addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class); //  Add JWT filter
-
-        return http.build();
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+            .build();
     }
 
     @Bean
@@ -58,16 +57,11 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder(); // Secure password hashing
     }
 
-    @Bean
-    public JwtAuthFilter jwtAuthFilter() {
-        return new JwtAuthFilter(jwtUtils, userDetailsService);
-    }
-
     // CORS Configuration
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("*")); // Allow all origins (adjust for production)
+        configuration.setAllowedOrigins(List.of("*")); // Allow all origins
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
