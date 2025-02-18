@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -35,11 +34,9 @@ public class AuthController {
         try {
             // Authenticate the user using Spring Security
             Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                    loginRequest.getUsername(),
-                    loginRequest.getPassword()
-                )
-            );
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getUsername(),
+                            loginRequest.getPassword()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
             // Generate a JWT token
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
