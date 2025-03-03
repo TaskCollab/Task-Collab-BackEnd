@@ -44,13 +44,13 @@ CREATE TABLE user_roles (
 
 
 CREATE TABLE Task (
-   taskId BIGINT NOT NULL PRIMARY KEY,
-   taskTitle NVARCHAR(255) NOT NULL,
+   task_Id BIGINT NOT NULL PRIMARY KEY,
+   task_Title NVARCHAR(255) NOT NULL,
    description NVARCHAR(MAX),
-   assignedTo BIGINT NULL,
+   assigned_To BIGINT NULL,
    status NVARCHAR(50),
    deadline DATETIME,
-   FOREIGN KEY (assignedTo) REFERENCES Users(user_Id) ON DELETE SET NULL
+   FOREIGN KEY (assigned_To) REFERENCES Users(user_Id) ON DELETE SET NULL
 );
 
 CREATE TABLE Conversation (
@@ -115,7 +115,7 @@ INSERT INTO user_roles (user_id, role_id) VALUES
 (103, 3);
 
 -- Insert tasks
-INSERT INTO Task (taskId, taskTitle, description, assignedTo, status, deadline) VALUES
+INSERT INTO Task (task_Id, task_Title, description, assigned_To, status, deadline) VALUES
 (1001, 'Fix Server Issues', 'Resolve reported server crashes', 101, 'In Progress', '2025-02-15 17:00:00'),
 (1002, 'Update Documentation', 'Revise API docs with latest changes', 102, 'Pending', '2025-02-18 12:00:00'),
 (1003, 'Develop New Feature', 'Implement the requested UI update', 103, 'Completed', '2025-02-10 09:00:00');
