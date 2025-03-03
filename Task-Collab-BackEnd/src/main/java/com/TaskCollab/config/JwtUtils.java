@@ -46,10 +46,38 @@ public class JwtUtils {
                 .compact();
     }
 
+
+    private Boolean isTokenExpired(Claims claims) {
+            return extractExpiration(claims).before(new Date());
+    }
+
+ 
+
+    public Date extractExpiration(Claims claims) {
+        return claims.getExpiration(); // Extract expiration
+    }
+    
+
+    private Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder() // Use parserBuilder
+                .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes())) // Use getBytes()
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    public String extractUsername(String token) {
+        return Jwts.parserBuilder() // Use parserBuilder
+                .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes())) // Use getBytes()
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
+
     public boolean validateToken(String token) {
         try {
             Claims claims = extractAllClaims(token);
-
             return !isTokenExpired(claims);
         } catch (SignatureException e) {
             System.out.println("Invalid JWT signature: " + e.getMessage());
@@ -58,30 +86,5 @@ public class JwtUtils {
         }
         return false;
     }
-
-    private Boolean isTokenExpired(Claims claims) {
-            return extractExpiration(claims).before(new Date());
     }
 
-    public String extractUsername(String token) {
-        return Jwts.parserBuilder()  
-                .setSigningKey(secret.getBytes())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
-    }
-
-    public Date extractExpiration(Claims claims) {
-        return claims.getExpiration(); // Extract expiration
-    }
-
-
-    private Claims extractAllClaims(String token) {
-        return Jwts.parser()
-                   .setSigningKey(secret)
-                   .parseClaimsJws(token)
-                   .getBody();
-    }
-}
- 
