@@ -75,7 +75,7 @@ public class JwtUtils {
     public Date extractExpiration(Claims claims) {
         return claims.getExpiration(); // Extract expiration
     }
-    
+
 
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
@@ -84,3 +84,4 @@ public class JwtUtils {
                    .getBody();
     }
 }
+ 
