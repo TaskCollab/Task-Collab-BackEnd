@@ -81,42 +81,36 @@ Data is transmitted between the client and server using Data Transfer Objects (D
 
 
 ## UML Class Diagram
-
-+--------------------------------+
-|             Task               |
-+--------------------------------+
-| - id: Long                     |
-| - taskTitle: String            |
-| - description: String          |
-| - assignedTo: Long             |
-| - status: String               |
-| - deadline: LocalDateTime      |
-+--------------------------------+
-
-            ↑
-            | builds
-            |
-+--------------------------------+
-|          TaskBuilder           |
-+--------------------------------+
-| - task: Task                   |
-+--------------------------------+
-| + TaskBuilder()                |
-| + withTitle(title: String): TaskBuilder        |
-| + withDescription(desc: String): TaskBuilder   |
-| + withAssignedTo(assignedTo: Long): TaskBuilder  |
-| + withStatus(status: String): TaskBuilder        |
-| + withDeadline(deadline: LocalDateTime): TaskBuilder |
-| + build(): Task                |
-+--------------------------------+
-+--------------------------------+
-|           TaskDTO              |
-+--------------------------------+
-| + id: Long                     |
-| + taskTitle: String            |
-| + description: String          |
-| + assignedTo: Long             |
-| + status: String               |
-| + deadline: LocalDateTime      |
-+--------------------------------+
+classDiagram
+    class Task {
+      +Long id
+      +String taskTitle
+      +String description
+      +Long assignedTo
+      +String status
+      +LocalDateTime deadline
+    }
+    
+    class TaskBuilder {
+      -Task task
+      +TaskBuilder()
+      +withTitle(String title) TaskBuilder
+      +withDescription(String description) TaskBuilder
+      +withAssignedTo(Long assignedTo) TaskBuilder
+      +withStatus(String status) TaskBuilder
+      +withDeadline(LocalDateTime deadline) TaskBuilder
+      +build() Task
+    }
+    
+    TaskBuilder --> Task : builds
+                                            
+classDiagram
+    class TaskDTO {
+      +Long id
+      +String taskTitle
+      +String description
+      +Long assignedTo
+      +String status
+      +LocalDateTime deadline
+    }
 
