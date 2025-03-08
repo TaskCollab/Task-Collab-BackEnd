@@ -57,34 +57,6 @@ public class JwtUtils {
         return claims.getExpiration(); // Extract expiration
     }
     
-
-    private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder() // Use parserBuilder
-                .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes())) // Use getBytes()
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-    }
-
-    public String extractUsername(String token) {
-        return Jwts.parserBuilder() // Use parserBuilder
-                .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes())) // Use getBytes()
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
-    }
-
-    public boolean validateToken(String token) {
-        try {
-            Claims claims = extractAllClaims(token);
-            return !isTokenExpired(claims);
-        } catch (SignatureException e) {
-            System.out.println("Invalid JWT signature: " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("JWT validation error: " + e.getMessage());
-        }
-        return false;
     }
 }
 
