@@ -3,7 +3,7 @@ The goal is to develop a scalable, feature-rich system for managing tasks in a t
 
 Tech Stack
 
-Languages: JavaScript, Java
+Languages: JavaScript, Java, TypeScript
 Frameworks: React, SpringBoot, socket.io
 Database: PostgreSQL/SQL Server
 Testing Tools: Junit, Jest/Cypress
