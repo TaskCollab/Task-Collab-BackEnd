@@ -46,41 +46,17 @@ public class JwtUtils {
                 .compact();
     }
 
-    public boolean validateToken(String token) {
-        try {
-            Claims claims = extractAllClaims(token);
-
-            return !isTokenExpired(claims);
-        } catch (SignatureException e) {
-            System.out.println("Invalid JWT signature: " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("JWT validation error: " + e.getMessage());
-        }
-        return false;
-    }
 
     private Boolean isTokenExpired(Claims claims) {
             return extractExpiration(claims).before(new Date());
     }
 
-    public String extractUsername(String token) {
-        return Jwts.parserBuilder()  
-                .setSigningKey(secret.getBytes())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
-    }
+ 
 
     public Date extractExpiration(Claims claims) {
         return claims.getExpiration(); // Extract expiration
     }
     
-
-    Claims extractAllClaims(String token) {
-        return Jwts.parser()
-                   .setSigningKey(secret)
-                   .parseClaimsJws(token)
-                   .getBody();
     }
 }
+
