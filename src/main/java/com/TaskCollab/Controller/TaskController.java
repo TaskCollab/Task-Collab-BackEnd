@@ -1,13 +1,20 @@
 package com.TaskCollab.Controller;
 
-import com.TaskCollab.Service.TaskService;
 import com.TaskCollab.dto.TaskDTO;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
+
+import com.TaskCollab.Service.TaskService;
+import com.TaskCollab.config.JwtProperties;
+
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/tasks")
@@ -16,35 +23,38 @@ public class TaskController {
     @Autowired
     private TaskService taskService;
 
-    // 2. Get a single task by ID
-    @GetMapping("/{id}")
+    @Autowired
+    private JwtProperties jwtProperties;
+
+    // POST request to retrieve a task by ID
+    @PostMapping("/{id}")
     public ResponseEntity<TaskDTO> getTask(@PathVariable Long id) {
         TaskDTO task = taskService.getTaskById(id);
         return (task != null)
-                ? ResponseEntity.ok(task)
-                : ResponseEntity.notFound().build();
+            ? ResponseEntity.ok(task)
+            : ResponseEntity.notFound().build();
     }
 
-    // 3. Create a new task
-    @PostMapping
+    // PUT request to update a task by ID
+    @PutMapping("/update/{id}")
+    public ResponseEntity<TaskDTO> updateTask(@PathVariable Long id, @RequestBody TaskDTO taskDTO) {
+        TaskDTO updatedTask = taskService.updateTask(id, taskDTO);
+        return (updatedTask != null)
+            ? ResponseEntity.ok(updatedTask)
+            : ResponseEntity.notFound().build();
+    }
+
+    // POST request to create a new task
+    @PostMapping("/create")
     public ResponseEntity<TaskDTO> createTask(@RequestBody TaskDTO taskDTO) {
         TaskDTO createdTask = taskService.createTask(taskDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTask);
     }
 
-    // 4. Update an existing task
-    @PutMapping("/{id}")
-    public ResponseEntity<TaskDTO> updateTask(@PathVariable Long id, @RequestBody TaskDTO taskDTO) {
-        TaskDTO updatedTask = taskService.updateTask(id, taskDTO);
-        return (updatedTask != null)
-                ? ResponseEntity.ok(updatedTask)
-                : ResponseEntity.notFound().build();
-    }
-
-    // 5. Delete a task by ID
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteTask(@PathVariable Long id) {
-        boolean deleted = taskService.deleteTask(id);
+    // DELETE request to delete a task by ID
+    @PostMapping("/delete/{task_Id}")
+    public ResponseEntity<String> deleteTask(@PathVariable Long task_Id) {
+        boolean deleted = taskService.deleteTask(task_Id);
         if (deleted) {
             return ResponseEntity.ok("Task deleted successfully.");
         } else {
@@ -52,16 +62,22 @@ public class TaskController {
         }
     }
 
-    // 6. (Optional) Get tasks assigned to the current user
-    //    Use this if you have user-based logic to identify "my tasks."
     @GetMapping("/my-tasks")
-    public ResponseEntity<List<TaskDTO>> getMyTasks() {
-        // This assumes you have logic to retrieve the currently authenticated user’s username
-        // e.g., from Spring Security’s SecurityContextHolder, then do:
-        // String currentUsername = ...
-        // List<TaskDTO> myTasks = taskService.getTasksAssignedTo(currentUsername);
-        // return ResponseEntity.ok(myTasks);
+    public ResponseEntity<List<TaskDTO>> getMyTasks(HttpServletRequest request) { // Add HttpServletRequest
+        String token = request.getHeader("Authorization").substring(7); // Extract token from Authorization header
 
-        return ResponseEntity.ok().build(); // Remove or implement properly if needed
+        String secret = jwtProperties.getSecret();
+        String username = Jwts.parserBuilder() // Use parserBuilder
+                .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes())) // Use getBytes()
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+
+        System.out.println(username);
+                
+        List<TaskDTO> userTasks = taskService.getTasksByUsername(username);
+
+        return ResponseEntity.ok(userTasks);
     }
 }

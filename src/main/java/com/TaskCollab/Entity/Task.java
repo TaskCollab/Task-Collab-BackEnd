@@ -12,7 +12,8 @@ public class Task {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long task_id;
+    @Column(name = "task_Id")
+    private Long task_Id;
 
     private String task_Title;
     private String description;
@@ -22,11 +23,11 @@ public class Task {
 
     // Getters and Setters
     public Long getTask_id() {
-        return task_id;
+        return task_Id;
     }
 
     public void setTask_id(Long task_id) {
-        this.task_id = task_id;
+        this.task_Id = task_id;
     }
 
     public String getTask_Title() {

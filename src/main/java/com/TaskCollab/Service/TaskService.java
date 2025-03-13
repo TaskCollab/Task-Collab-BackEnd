@@ -6,7 +6,9 @@ import com.TaskCollab.dao.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TaskService {
@@ -51,12 +53,19 @@ public class TaskService {
     }
 
     // Delete task by ID
-    public boolean deleteTask(Long taskId) {
-        if (taskRepository.existsById(taskId)) {
-            taskRepository.deleteById(taskId);
+    public boolean deleteTask(Long task_Id) {
+        if (taskRepository.findById(task_Id) != null) {
+            taskRepository.deleteById(task_Id);
+            System.out.println("Deleted Task with ID: " + task_Id);  // Debugging
             return true;
         }
+        System.out.println("Task ID " + task_Id + " not found."); // Debugging
         return false;
+    }
+
+    public List<TaskDTO> getTasksByUsername(String username) {
+        List<Task> tasks = taskRepository.findByAssigned_To(username); // Assuming Assigned_To is your username field
+        return tasks.stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
     // Helper method to convert Entity -> DTO

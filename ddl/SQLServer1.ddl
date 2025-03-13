@@ -44,7 +44,7 @@ CREATE TABLE user_roles (
 
 
 CREATE TABLE Task (
-   task_Id BIGINT NOT NULL PRIMARY KEY,
+   task_Id BIGINT IDENTITY(1000,1) NOT NULL PRIMARY KEY,
    task_Title NVARCHAR(255) NOT NULL,
    description NVARCHAR(MAX),
    assigned_To NVARCHAR(255) NULL,
@@ -115,10 +115,10 @@ INSERT INTO user_roles (user_id, role_id) VALUES
 (103, 3);
 
 -- Insert tasks
-INSERT INTO Task (task_Id, task_Title, description, assigned_To, status, deadline) VALUES
-(1001, 'Fix Server Issues', 'Resolve reported server crashes', 'admin_user', 'In Progress', '2025-02-15 17:00:00'),
-(1002, 'Update Documentation', 'Revise API docs with latest changes', 'admin_user', 'Pending', '2025-02-18 12:00:00'),
-(1003, 'Develop New Feature', 'Implement the requested UI update', 'admin_user', 'Completed', '2025-02-10 09:00:00');
+INSERT INTO Task (task_Title, description, assigned_To, status, deadline) VALUES
+('Fix Server Issues', 'Resolve reported server crashes', 'admin_user', 'In Progress', '2025-02-15 17:00:00'),
+('Update Documentation', 'Revise API docs with latest changes', 'admin_user', 'Pending', '2025-02-18 12:00:00'),
+('Develop New Feature', 'Implement the requested UI update', 'admin_user', 'Completed', '2025-02-10 09:00:00');
 
 -- Insert conversations
 INSERT INTO Conversation (conversationId, createdAt, lastUpdatedAt) VALUES
