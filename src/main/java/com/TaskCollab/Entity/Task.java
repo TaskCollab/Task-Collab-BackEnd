@@ -8,7 +8,17 @@ import java.time.LocalDateTime;
 @Entity
 @Data
 @Table(name = "task")
-public class Task {
+public class Task implements TaskInterface {
+
+    @Override
+    public Long getTask_Id() {
+        return task_Id;
+    }
+
+    @Override
+    public void setTask_Id(Long task_Id) {
+        this.task_Id = task_Id;
+    }
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,14 +31,6 @@ public class Task {
     private String status;
     private LocalDateTime deadline;
 
-    // Getters and Setters
-    public Long getTask_id() {
-        return task_Id;
-    }
-
-    public void setTask_id(Long task_id) {
-        this.task_Id = task_id;
-    }
 
     public String getTask_Title() {
         return task_Title;

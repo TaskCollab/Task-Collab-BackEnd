@@ -1,11 +1,13 @@
 package com.TaskCollab.Service;
 
+import com.TaskCollab.Decorator.LoggingTaskDecorator;
+import com.TaskCollab.Decorator.ValidationTaskDecorator;
 import com.TaskCollab.dto.TaskDTO;
 import com.TaskCollab.Entity.Task;
+import com.TaskCollab.Entity.TaskInterface;
 import com.TaskCollab.dao.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -17,13 +19,18 @@ public class TaskService {
     private TaskRepository taskRepository;
 
     // Retrieve a specific task by its ID
-    public TaskDTO getTaskById(Long taskId) {
+    public TaskInterface getTaskById(Long taskId) {
         Optional<Task> taskOpt = taskRepository.findById(taskId);
-        return taskOpt.map(this::convertToDTO).orElse(null);
+        return taskOpt.map(task -> {
+            TaskInterface decoratedTask = task;
+            decoratedTask = new LoggingTaskDecorator(decoratedTask);
+            decoratedTask = new ValidationTaskDecorator(decoratedTask);
+            return decoratedTask;
+        }).orElse(null);
     }
 
     // Create a new task
-    public TaskDTO createTask(TaskDTO taskDTO) {
+    public TaskInterface createTask(TaskDTO taskDTO) {
         Task task = new Task();
         task.setTask_Title(taskDTO.getTask_Title());
         task.setDescription(taskDTO.getDescription());
@@ -32,14 +39,17 @@ public class TaskService {
         task.setDeadline(taskDTO.getDeadline());
 
         Task savedTask = taskRepository.save(task);
-        return convertToDTO(savedTask);
+
+        TaskInterface decoratedTask = savedTask;
+        decoratedTask = new LoggingTaskDecorator(decoratedTask);
+        decoratedTask = new ValidationTaskDecorator(decoratedTask);
+        return decoratedTask;
     }
 
     // Update existing task by ID
-    public TaskDTO updateTask(Long taskId, TaskDTO taskDTO) {
+    public TaskInterface updateTask(Long taskId, TaskDTO taskDTO) {
         Optional<Task> existingTaskOpt = taskRepository.findById(taskId);
-        if (existingTaskOpt.isPresent()) {
-            Task existingTask = existingTaskOpt.get();
+        return existingTaskOpt.map(existingTask -> {
             existingTask.setTask_Title(taskDTO.getTask_Title());
             existingTask.setDescription(taskDTO.getDescription());
             existingTask.setAssigned_To(taskDTO.getAssigned_To());
@@ -47,36 +57,31 @@ public class TaskService {
             existingTask.setDeadline(taskDTO.getDeadline());
 
             Task updatedTask = taskRepository.save(existingTask);
-            return convertToDTO(updatedTask);
-        }
-        return null;
+            TaskInterface decoratedTask = updatedTask;
+            decoratedTask = new LoggingTaskDecorator(decoratedTask);
+            decoratedTask = new ValidationTaskDecorator(decoratedTask);
+            return decoratedTask;
+        }).orElse(null);
     }
 
     // Delete task by ID
     public boolean deleteTask(Long task_Id) {
-        if (taskRepository.findById(task_Id) != null) {
+        if (taskRepository.findById(task_Id).isPresent()) {
             taskRepository.deleteById(task_Id);
-            System.out.println("Deleted Task with ID: " + task_Id);  // Debugging
+            System.out.println("Deleted Task with ID: " + task_Id);
             return true;
         }
-        System.out.println("Task ID " + task_Id + " not found."); // Debugging
+        System.out.println("Task ID " + task_Id + " not found.");
         return false;
     }
 
-    public List<TaskDTO> getTasksByUsername(String username) {
-        List<Task> tasks = taskRepository.findByAssigned_To(username); // Assuming Assigned_To is your username field
-        return tasks.stream().map(this::convertToDTO).collect(Collectors.toList());
-    }
-
-    // Helper method to convert Entity -> DTO
-    private TaskDTO convertToDTO(Task task) {
-        TaskDTO dto = new TaskDTO();
-        dto.setTask_Id(task.getTask_id());
-        dto.setTask_Title(task.getTask_Title());
-        dto.setDescription(task.getDescription());
-        dto.setAssigned_To(task.getAssigned_To());
-        dto.setStatus(task.getStatus());
-        dto.setDeadline(task.getDeadline());
-        return dto;
+    public List<TaskInterface> getTasksByUsername(String username) {
+        List<Task> tasks = taskRepository.findByAssigned_To(username);
+        return tasks.stream().map(task -> {
+            TaskInterface decoratedTask = task;
+            decoratedTask = new LoggingTaskDecorator(decoratedTask);
+            decoratedTask = new ValidationTaskDecorator(decoratedTask);
+            return decoratedTask;
+        }).collect(Collectors.toList());
     }
 }
