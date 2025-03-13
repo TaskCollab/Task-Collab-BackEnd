@@ -7,6 +7,11 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 
 import com.TaskCollab.Service.TaskService;
+import com.TaskCollab.config.JwtProperties;
+
+import java.util.List;
+
+
 import com.TaskCollab.config.JwtUtils;
 import com.TaskCollab.config.JwtProperties;
 
@@ -20,7 +25,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 
-
 @RestController
 @RequestMapping("/api/tasks")
 public class TaskController {
@@ -30,19 +34,43 @@ public class TaskController {
     @Autowired
     private JwtProperties jwtProperties;
 
-    @PostMapping("/task/{id}")
+    // POST request to retrieve a task by ID
+    @PostMapping("/{id}")
     public ResponseEntity<TaskDTO> getTask(@PathVariable Long id) {
         TaskDTO task = taskService.getTaskById(id);
-        return (task != null) ? ResponseEntity.ok(task) : ResponseEntity.notFound().build();
+        return (task != null)
+            ? ResponseEntity.ok(task)
+            : ResponseEntity.notFound().build();
     }
 
+    // PUT request to update a task by ID
     @PutMapping("/update/{id}")
     public ResponseEntity<TaskDTO> updateTask(@PathVariable Long id, @RequestBody TaskDTO taskDTO) {
         TaskDTO updatedTask = taskService.updateTask(id, taskDTO);
-        return (updatedTask != null) ? ResponseEntity.ok(updatedTask) : ResponseEntity.notFound().build();
+        return (updatedTask != null)
+            ? ResponseEntity.ok(updatedTask)
+            : ResponseEntity.notFound().build();
     }
 
-   @GetMapping("/my-tasks")
+    // POST request to create a new task
+    @PostMapping("/create")
+    public ResponseEntity<TaskDTO> createTask(@RequestBody TaskDTO taskDTO) {
+        TaskDTO createdTask = taskService.createTask(taskDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdTask);
+    }
+
+    // DELETE request to delete a task by ID
+    @PostMapping("/delete/{task_Id}")
+    public ResponseEntity<String> deleteTask(@PathVariable Long task_Id) {
+        boolean deleted = taskService.deleteTask(task_Id);
+        if (deleted) {
+            return ResponseEntity.ok("Task deleted successfully.");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/my-tasks")
     public ResponseEntity<List<TaskDTO>> getMyTasks(HttpServletRequest request) { // Add HttpServletRequest
         String token = request.getHeader("Authorization").substring(7); // Extract token from Authorization header
 
@@ -53,7 +81,6 @@ public class TaskController {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
-
         System.out.println(username);
                 
         List<TaskDTO> userTasks = taskService.getTasksByUsername(username);

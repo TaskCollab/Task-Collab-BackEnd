@@ -36,6 +36,22 @@ public class TaskService {
         return null;
     }
 
+    // Delete task by ID
+    public boolean deleteTask(Long task_Id) {
+        if (taskRepository.findById(task_Id) != null) {
+            taskRepository.deleteById(task_Id);
+            System.out.println("Deleted Task with ID: " + task_Id);  // Debugging
+            return true;
+        }
+        System.out.println("Task ID " + task_Id + " not found."); // Debugging
+        return false;
+    }
+
+    public List<TaskDTO> getTasksByUsername(String username) {
+        List<Task> tasks = taskRepository.findByAssigned_To(username); // Assuming Assigned_To is your username field
+        return tasks.stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+
     private TaskDTO convertToDTO(Task task) {
         TaskDTO dto = new TaskDTO();
         dto.setId(task.getTask_id());
@@ -47,8 +63,5 @@ public class TaskService {
         return dto;
     }
 
-    public List<TaskDTO> getTasksByUsername(String username) {
-        List<Task> tasks = taskRepository.findByAssigned_To(username); // Assuming Assigned_To is your username field
-        return tasks.stream().map(this::convertToDTO).collect(Collectors.toList());
-    }
+
 }
