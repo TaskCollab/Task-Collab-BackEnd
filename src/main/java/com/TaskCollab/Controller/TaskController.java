@@ -11,15 +11,23 @@ import com.TaskCollab.config.JwtProperties;
 
 import java.util.List;
 
+
+import com.TaskCollab.config.JwtUtils;
+import com.TaskCollab.config.JwtProperties;
+
+import java.net.http.HttpHeaders;
+import java.util.List;
+
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
 
 @RestController
 @RequestMapping("/api/tasks")
 public class TaskController {
-
     @Autowired
     private TaskService taskService;
 
@@ -73,11 +81,11 @@ public class TaskController {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
-
         System.out.println(username);
                 
         List<TaskDTO> userTasks = taskService.getTasksByUsername(username);
 
         return ResponseEntity.ok(userTasks);
     }
+
 }
