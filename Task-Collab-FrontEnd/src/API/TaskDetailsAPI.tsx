@@ -38,7 +38,7 @@ export const deleteTask = async (taskId: number) => {
   console.log(TASK_API_URL);
   console.log(token);
   console.log("Constructed URL:", `${TASK_API_URL}delete/${taskId}`); 
-  const response = await axios.post(`${TASK_API_URL}delete/${taskId}`, {
+  const response = await axios.delete(`${TASK_API_URL}delete/${taskId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

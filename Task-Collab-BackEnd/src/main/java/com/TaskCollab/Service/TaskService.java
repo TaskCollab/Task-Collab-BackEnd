@@ -3,6 +3,9 @@ package com.TaskCollab.Service;
 import com.TaskCollab.Decorator.LoggingTaskDecorator;
 import com.TaskCollab.Decorator.ValidationTaskDecorator;
 import com.TaskCollab.dto.TaskDTO;
+
+import jakarta.transaction.Transactional;
+
 import com.TaskCollab.Entity.Task;
 import com.TaskCollab.Entity.TaskInterface;
 import com.TaskCollab.dao.TaskRepository;
@@ -61,6 +64,7 @@ public class TaskService {
         }).orElse(null);
     }
 
+    @Transactional
     public boolean deleteTask(Long task_Id) {
         if (taskRepository.findById(task_Id).isPresent()) {
             taskRepository.deleteById(task_Id);
