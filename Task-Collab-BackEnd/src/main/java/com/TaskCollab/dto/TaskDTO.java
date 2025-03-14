@@ -7,7 +7,7 @@ public class TaskDTO {
     private Long id;
     private String taskTitle;
     private String description;
-    private Long assignedTo;
+    private String assignedTo;
     private String status;
     private LocalDateTime deadline;
 }
