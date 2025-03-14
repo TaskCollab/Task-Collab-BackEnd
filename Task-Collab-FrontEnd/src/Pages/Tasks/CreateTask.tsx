@@ -134,8 +134,9 @@ const CreateTask: React.FC<CreateTaskProps> = ({ open, onClose, onTaskCreated, i
             required
           >
             {/* Replace with actual user list from API */}
-            <MenuItem value="1">Kevin Zhang</MenuItem>
-            <MenuItem value="2">Vu Drudh</MenuItem>
+            <MenuItem value="admin_user">admin_user</MenuItem>
+            <MenuItem value="manager_user">manager_user</MenuItem>
+            <MenuItem value="employee_user">employee_user</MenuItem>
           </Select>
           {errors.assignee && <FormHelperText>{errors.assignee}</FormHelperText>}
         </FormControl>

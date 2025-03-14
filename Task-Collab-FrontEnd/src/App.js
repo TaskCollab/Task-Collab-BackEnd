@@ -6,20 +6,22 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 import Login from './Pages/auth/Login.tsx';
-import Tasks from './Pages/tasks/ViewTasks.tsx';
-import TaskDetails from './Pages/tasks/TaskDetails.tsx'; // Import TaskDetails
+import Tasks from './Pages/Tasks/ViewTasks.tsx';
+import TaskDetails from './Pages/Tasks/TaskDetails.tsx'; // Import TaskDetails
 import ProtectedRoute from './Components/ProtectedRoute.tsx';
+import Header from './Components/Header/Header';
 
 function App() {
   return (
     <Router>
       <div className="App">
+        <Header />
         <ToastContainer />
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/tasks" element={<Tasks />} />
-            <Route path="/Tasks" element={<Tasks />} />
+            <Route path="/home" element={<Tasks />} />
             <Route path="/" element={<Login />} />
             <Route path="/tasks/:taskId" element={<TaskDetails />} /> {/* Add TaskDetails route */}
 

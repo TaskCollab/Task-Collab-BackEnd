@@ -47,17 +47,17 @@ export const TaskAPI = {
 },
 
   getTask: async (id: number) => {
-    const response = await taskApiClient.get(`/tasks/${id}`);
+    const response = await taskApiClient.get(`${id}`);
     return response.data;
   },
 
   updateTask: async (id: number, taskData: Partial<TaskDTO>) => {
-    const response = await taskApiClient.put(`/tasks/${id}`, taskData);
+    const response = await taskApiClient.put(`/update/${id}`, taskData);
     return response.data;
   },
 
   deleteTask: async (id: number) => {
-    const response = await taskApiClient.delete(`/tasks/${id}`);
+    const response = await taskApiClient.delete(`delete/${id}`);
     return response.data;
   }
 };

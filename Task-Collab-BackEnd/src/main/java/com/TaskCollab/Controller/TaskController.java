@@ -51,8 +51,8 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.CREATED).body(convertToDTO(createdTask));
     }
 
-    @PostMapping("/delete/{task_Id}")
-    public ResponseEntity<String> deleteTask(@PathVariable Long task_Id) {
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteTask(@PathVariable("id") Long task_Id) {
         boolean deleted = taskService.deleteTask(task_Id);
         if (deleted) {
             return ResponseEntity.ok("Task deleted successfully.");
