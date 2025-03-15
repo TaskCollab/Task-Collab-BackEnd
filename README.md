@@ -1,15 +1,107 @@
-# Task-Collab-BackEnd
-
-Task Collaboration Project for COSC 310
-# Task Collab BackEnd
+ 
+# Project B: Collaborative Task Management System by Chill Guys
 
 ## Overview
+The **Collaborative Task Management System** is designed to streamline team-based task assignments, project tracking, and user collaboration. It provides user authentication, role-based access control, and a structured workflow for managing tasks efficiently.
 
-Task Collab BackEnd is a Spring Boot application that provides RESTful APIs for managing tasks and user authentication. It leverages Spring Security with JWT for secure access and employs design patterns to ensure clean, maintainable code.
+---
 
-## Feature Planning for Task Creation and Deletion
+## Technologies Used
+### Backend:
+- **Language & Framework:** Java (Spring Boot)
+- **Authentication:** JWT-based Authentication & Authorization
+- **Data Persistence:** MySQL Database using JPA/Hibernate
+- **Security:** Spring Security with Role-Based Access Control (RBAC)
+- **Dependency Management:** Maven
+- **Logging & Monitoring:** Spring Boot Actuator, Log4j
 
-This section outlines the planning for implementing task creation and deletion features, including API endpoints, data transfer details, and design patterns.
+### Frontend:
+- **Framework:** React.js (with functional components & hooks)
+- **State Management:** Redux Toolkit
+- **UI Library:** Material UI for styling
+- **Routing:** React Router
+- **API Communication:** Axios for RESTful API calls
+
+### Deployment:
+- **Backend:** Hosted on AWS/GCP/Azure (TBD)
+- **Frontend:** Deployed via Netlify/Vercel (TBD)
+- **Database:** MySQL managed via AWS RDS
+
+---
+
+## Core Features
+### Authentication & User Management
+- User Registration & Login (JWT-based)
+- Role-Based Access Control (Admin, User)
+- Secure password storage with BCrypt hashing
+
+### Task Management
+- Create, Read, Update, Delete (CRUD) tasks
+- Assign tasks to users
+- Track task progress and status updates
+- Due date and deadline tracking
+
+### Collaboration Features
+- Commenting system for task discussions
+- Notifications for task updates
+- User activity logging
+
+---
+
+## API Endpoints
+### Authentication
+| Method | Endpoint | Description |
+|--------|---------|-------------|
+| POST | `/api/auth/login` | User Login |
+| POST | `/api/auth/register` | User Registration |
+
+### Task Management
+| Method | Endpoint | Description |
+|--------|---------|-------------|
+| GET | `/api/tasks` | Fetch all tasks |
+| GET | `/api/tasks/{id}` | Fetch a task by ID |
+| POST | `/api/tasks` | Create a new task |
+| PUT | `/api/tasks/{id}` | Update a task |
+| DELETE | `/api/tasks/{id}` | Delete a task |
+
+---
+
+## Testing Strategy
+### Backend Testing
+- **Unit Tests:** JUnit & Mockito for service layer testing
+- **Integration Tests:** Using Spring Boot Test framework
+- **Authentication Testing:** MockMvc for testing secured endpoints
+- **Database Testing:** H2 in-memory database for integration tests
+
+### Frontend Testing
+#### Test Architecture
+- **Testing Framework:** Cypress  
+- **Testing Type:** End-to-End (UI/Interaction Focus)  
+
+#### Test Structure
+1. **Unit Testing:**  
+   - Using Jest & React Testing Library  
+   - Covers UI components, reducers, utility functions
+
+2. **End-to-End (E2E) Testing:**  
+   - Using Cypress  
+   - Simulates real user interactions like login, task creation, updating, and deletion.
+
+3. **Integration Testing:**  
+   - Ensures seamless API integration with mock data  
+   - Axios request validation  
+
+4. **Visual Regression Testing:**  
+   - Ensures UI consistency using tools like Percy  
+
+5. **Accessibility Testing:**  
+   - Keyboard navigation tests to ensure accessibility  
+   - Ensures compliance with WCAG guidelines  
+
+#### Future Enhancements
+- Add `data-testid` attributes to all interactive elements.
+- Implement visual regression testing.
+- Automate keyboard navigation tests.
 
 ### API Endpoints
 
@@ -61,24 +153,6 @@ Data is transmitted between the client and server using Data Transfer Objects (D
 - **Security:** Configure JWT authentication and authorization (e.g., `SecurityConfig`, `JwtUtils`, `JwtAuthFilter`).
 - **Utilities:** Helper classes like `TaskBuilder` in `com.TaskCollab.util` for constructing domain objects.
 - **DTOs:** Classes such as `TaskDTO`, `LoginRequest`, and `LoginResponse` for data transfer between layers.
-
-## Getting Started
-
-1. **Clone the repository:**
-    ```bash
-    git clone https://github.com/TaskCollab/Task-Collab-BackEnd.git
-    cd Task-Collab-BackEnd
-    ```
-
-2. **Build and run the application:**
-    ```bash
-    ./mvnw clean install
-    ./mvnw spring-boot:run
-    ```
-
-3. **Test the API Endpoints:**  
-   Use tools like Postman or cURL to interact with the API endpoints. Swagger or similar API documentation tools may also be integrated.
-
 
 ## UML Class Diagram
 classDiagram
