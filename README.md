@@ -21,14 +21,6 @@ The **Collaborative Task Management System** is designed to streamline team-base
 - **UI Library:** Material UI for styling
 - **Routing:** React Router
 - **API Communication:** Axios for RESTful API calls
-
-### Deployment:
-- **Backend:** Hosted on AWS/GCP/Azure (TBD)
-- **Frontend:** Deployed via Netlify/Vercel (TBD)
-- **Database:** MySQL managed via AWS RDS
-
----
-
 ## Core Features
 ### Authentication & User Management
 - User Registration & Login (JWT-based)
@@ -40,30 +32,6 @@ The **Collaborative Task Management System** is designed to streamline team-base
 - Assign tasks to users
 - Track task progress and status updates
 - Due date and deadline tracking
-
-### Collaboration Features
-- Commenting system for task discussions
-- Notifications for task updates
-- User activity logging
-
----
-
-## API Endpoints
-### Authentication
-| Method | Endpoint | Description |
-|--------|---------|-------------|
-| POST | `/api/auth/login` | User Login |
-| POST | `/api/auth/register` | User Registration |
-
-### Task Management
-| Method | Endpoint | Description |
-|--------|---------|-------------|
-| GET | `/api/tasks` | Fetch all tasks |
-| GET | `/api/tasks/{id}` | Fetch a task by ID |
-| POST | `/api/tasks` | Create a new task |
-| PUT | `/api/tasks/{id}` | Update a task |
-| DELETE | `/api/tasks/{id}` | Delete a task |
-
 ---
 
 ## Testing Strategy
@@ -86,17 +54,6 @@ The **Collaborative Task Management System** is designed to streamline team-base
 2. **End-to-End (E2E) Testing:**  
    - Using Cypress  
    - Simulates real user interactions like login, task creation, updating, and deletion.
-
-3. **Integration Testing:**  
-   - Ensures seamless API integration with mock data  
-   - Axios request validation  
-
-4. **Visual Regression Testing:**  
-   - Ensures UI consistency using tools like Percy  
-
-5. **Accessibility Testing:**  
-   - Keyboard navigation tests to ensure accessibility  
-   - Ensures compliance with WCAG guidelines  
 
 #### Future Enhancements
 - Add `data-testid` attributes to all interactive elements.
@@ -135,11 +92,15 @@ Data is transmitted between the client and server using Data Transfer Objects (D
 
 ### Design Patterns Implemented
 
-1. **Builder Pattern**
-   - **Purpose:** Simplifies and modularizes the construction of complex `Task` objects.
-   - **Implementation:** The `TaskBuilder` class (located in `com.TaskCollab.util`) provides a fluent API to set task properties (e.g., title, description, assigned user, status, deadline) and then build a complete `Task` object.
-   - **Benefits:** Improves code readability, reduces the need for multiple constructors, and centralizes object creation logic.
+1. **Decorator Pattern**
+Purpose: Dynamically adds responsibilities to TaskInterface objects without altering their core structure.
 
+Implementation: The TaskDecorator class (located in com.TaskCollab.Decorator) acts as an abstract base decorator. Concrete decorators like LoggingTaskDecorator and ValidationTaskDecorator extend TaskDecorator to add specific behaviors (logging, validation, etc.) to TaskInterface implementations.
+
+**Benefits:**
+Allows for flexible and dynamic addition of functionality.
+Promotes the Open/Closed principle (open for extension, closed for modification).
+Avoids the creation of numerous subclasses for each combination of features.
 2. **Data Transfer Object (DTO) Pattern**
    - **Purpose:** Separates internal data representations from the API contract.
    - **Implementation:** The `TaskDTO` class is used to transfer data between the Controller and Service layers, ensuring that the domain models remain encapsulated and only the necessary fields are exposed.
