@@ -1,12 +1,14 @@
-name: Spring Boot Tests
+name: Spring Boot Tests (Maven)
 
 on:
   push:
     branches:
       - main
+      - develop
   pull_request:
     branches:
       - main
+      - develop
 
 jobs:
   build:
@@ -19,21 +21,18 @@ jobs:
       - name: Set up JDK 17 (or your desired version)
         uses: actions/setup-java@v4
         with:
-          java-version: '17' 
-          distribution: 'temurin' 
+          java-version: '17' # Or your desired java version
+          distribution: 'temurin' # Or other distribution such as adopt or oracle
 
-      - name: Cache Gradle packages
+      - name: Cache Maven packages
         uses: actions/cache@v3
         with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
-            ${{ runner.os }}-gradle-
+            ${{ runner.os }}-maven-
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - name: Run Spring Boot tests with Maven
+        run: mvn clean verify
 
-      - name: Run Spring Boot tests with Gradle
-        run: ./gradlew test
-
-    
+     
