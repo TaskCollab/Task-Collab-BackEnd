@@ -5,36 +5,6 @@
 The **Collaborative Task Management System** is designed to streamline team-based task assignments, project tracking, and user collaboration. It provides user authentication, role-based access control, and a structured workflow for managing tasks efficiently.
 
 ---
-**Build and Run Instructions**
-To build and run the application, please ensure you have Docker and Docker Compose installed and running on your system. Follow these steps:
-
-**Verify Docker is Running:**
-Confirm that Docker is actively running on your machine. You can typically check this through your system tray or by running docker ps in your terminal.
-
-**Navigate to the Project Directory:**
-Open your terminal and navigate to the root directory of the project where the docker-compose.yml file is located.
-
-**Build and Start the Application:**
-Execute the following command in your terminal:
-
-        
-        docker-compose up --build
-        
-
-
-    
-This command will build the Docker images defined in your docker-compose.yml file and then start the containers.
-
-**Access the Application:**
-Once the containers are running, open your web browser and navigate to http://localhost:3000.
-
-    
-You should now be able to access and use the application.
-
-Note:
-
-The --build flag ensures that Docker rebuilds the images if any changes have been made to the Dockerfiles.
-If you need to stop the application, you can run docker-compose down in the same directory.
 
 ## Technologies Used
 ### Backend:
@@ -93,7 +63,7 @@ If you need to stop the application, you can run docker-compose down in the same
 ### API Endpoints
 
 #### Task Creation
-- **Endpoint:** `POST /api/tasks`
+- **Endpoint:** `POST /api/tasks/create`
 - **Description:** Creates a new task in the system.
 - **Request Body:** Expects a JSON payload that follows the `TaskDTO` format:
     ```json
@@ -108,13 +78,13 @@ If you need to stop the application, you can run docker-compose down in the same
 - **Response:** Returns the created task data with an HTTP 201 (Created) status.
 
 #### Task Deletion
-- **Endpoint:** `DELETE /api/tasks/{id}`
+- **Endpoint:** `DELETE /api/tasks/delete/{id}`
 - **Description:** Deletes an existing task identified by its unique ID.
 - **Response:** Returns a success message with an HTTP 200 status if the deletion is successful, or an HTTP 404 if the task is not found.
 
 #### Other Endpoints
 - **GET `/api/tasks/{id}`:** Retrieves a task by its ID.
-- **PUT `/api/tasks/{id}`:** Updates an existing task.
+- **POST `/api/tasks/update/{id}`:** Updates an existing task.
 
 ### Data Transfer
 
@@ -131,6 +101,7 @@ Implementation: The TaskDecorator class (located in com.TaskCollab.Decorator) ac
 Allows for flexible and dynamic addition of functionality.
 Promotes the Open/Closed principle (open for extension, closed for modification).
 Avoids the creation of numerous subclasses for each combination of features.
+
 2. **Data Transfer Object (DTO) Pattern**
    - **Purpose:** Separates internal data representations from the API contract.
    - **Implementation:** The `TaskDTO` class is used to transfer data between the Controller and Service layers, ensuring that the domain models remain encapsulated and only the necessary fields are exposed.
