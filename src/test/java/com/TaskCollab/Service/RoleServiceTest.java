@@ -34,6 +34,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+// This is the RoleServiceTest class testing the RoleService class.
 @ExtendWith(MockitoExtension.class)
 public class RoleServiceTest {
 

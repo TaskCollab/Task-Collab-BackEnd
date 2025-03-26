@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.TaskCollab.Entity.Role;
-
+//This is the RoleTest class testing the Role class.
 public class RoleTest {
 
     private Role role;

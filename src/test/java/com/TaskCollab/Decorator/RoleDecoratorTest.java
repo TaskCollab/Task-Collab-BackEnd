@@ -7,6 +7,7 @@ import com.TaskCollab.Entity.RoleInterface;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+// This is the RoleDecoratorTest class testing the RoleDecorator class.
 public class RoleDecoratorTest {
 
     // Create a concrete subclass for testing since RoleDecorator is abstract.
