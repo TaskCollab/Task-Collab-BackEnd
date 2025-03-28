@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 
 import com.TaskCollab.Decorator.LoggingRoleDecorator;
 import com.TaskCollab.Decorator.ValidationRoleDecorator;
@@ -33,7 +34,10 @@ public class RoleService {
 
     @PersistenceContext
     private EntityManager entityManager;  // Inject EntityManager
-    
+
+    // [Code smell No.1] Long searchRoles method. Need to extract into smaller methods
+
+    // Method 1: searchRoles method
     public Collection<RoleDTO> searchRoles(Integer roleId, String roleName, 
             Boolean createPermission, Boolean readPermission, 
             Boolean deletePermission, Boolean updatePermission, String userName) {
@@ -42,43 +46,46 @@ public class RoleService {
         CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
         Root<Role> role = cq.from(Role.class);
         
-        // Use inner join if searching by username; otherwise, a left join could be used.
-        Join<Role, Users> userJoin;
-        if (userName != null && !userName.trim().isEmpty()) {
-            userJoin = role.join("users", JoinType.INNER);
-        } else {
-            userJoin = role.join("users", JoinType.LEFT);
-        }
+        Join<Role, Users> userJoin = createUserJoin(role, userName);
+        List<Predicate> predicates = buildSearchPredicates(cb, role, userJoin, roleId, roleName, 
+        createPermission, readPermission, 
+        deletePermission, updatePermission, userName);
 
+        List<Object[]> results = executeSearchQuery(cb, cq, role, userJoin, predicates);
+
+        return mapToRoleDTOs(results);
+    }
+    // Method 2: createUserJoin method
+    private Join<Role, Users> createUserJoin(Root<Role> role, String userName) {
+        return (userName != null && !userName.trim().isEmpty()) 
+                ? role.join("users", JoinType.INNER) 
+                : role.join("users", JoinType.LEFT);
+    }
+    
+    // Method 3: buildSearchPredicates method
+    private List<Predicate> buildSearchPredicates(CriteriaBuilder cb, Root<Role> role, Join<Role, Users> userJoin, 
+                                                  Integer roleId, String roleName, Boolean createPermission, 
+                                                  Boolean readPermission, Boolean deletePermission, 
+                                                  Boolean updatePermission, String userName) {
         List<Predicate> predicates = new ArrayList<>();
 
-        // Optional filters for roleId and roleName
-        if (roleId != null) {
-            predicates.add(cb.equal(role.get("roleId"), roleId));
-        }
-        if (roleName != null && !roleName.trim().isEmpty()) {
+        if (roleId != null) predicates.add(cb.equal(role.get("roleId"), roleId));
+        if (roleName != null && !roleName.trim().isEmpty()) 
             predicates.add(cb.equal(cb.lower(role.get("roleName")), roleName.toLowerCase()));
-        }
-
-        // Optional permission filters (only added if non-null)
-        if (createPermission != null) {
-            predicates.add(cb.equal(role.get("createPermission"), createPermission));
-        }
-        if (readPermission != null) {
-            predicates.add(cb.equal(role.get("readPermission"), readPermission));
-        }
-        if (deletePermission != null) {
-            predicates.add(cb.equal(role.get("deletePermission"), deletePermission));
-        }
-        if (updatePermission != null) {
-            predicates.add(cb.equal(role.get("updatePermission"), updatePermission));
-        }
-
-        // Add username filter if provided
-        if (userName != null && !userName.trim().isEmpty()) {
+        if (createPermission != null) predicates.add(cb.equal(role.get("createPermission"), createPermission));
+        if (readPermission != null) predicates.add(cb.equal(role.get("readPermission"), readPermission));
+        if (deletePermission != null) predicates.add(cb.equal(role.get("deletePermission"), deletePermission));
+        if (updatePermission != null) predicates.add(cb.equal(role.get("updatePermission"), updatePermission));
+        if (userName != null && !userName.trim().isEmpty()) 
             predicates.add(cb.equal(cb.lower(userJoin.get("username")), userName.toLowerCase()));
-        }
 
+        return predicates;
+    }
+
+    // Method 4: executeSearchQuery method
+    private List<Object[]> executeSearchQuery(CriteriaBuilder cb, CriteriaQuery<Object[]> cq, 
+                                              Root<Role> role, Join<Role, Users> userJoin, 
+                                              List<Predicate> predicates) {
         cq.multiselect(
             role.get("roleId"),
             role.get("roleName"),
@@ -89,10 +96,12 @@ public class RoleService {
             userJoin.get("username")
         ).where(predicates.toArray(new Predicate[0]));
 
-        List<Object[]> results = entityManager.createQuery(cq).getResultList();
+        return entityManager.createQuery(cq).getResultList();
+    }
 
-        // Map results to RoleDTO objects
-        List<RoleDTO> roleDTOs = results.stream().map(result -> {
+    // Method 5: mapToRoleDTOs method
+    private List<RoleDTO> mapToRoleDTOs(List<Object[]> results) {
+        return results.stream().map(result -> {
             RoleDTO dto = new RoleDTO();
             dto.setRoleId((Integer) result[0]);
             dto.setRoleName((String) result[1]);
@@ -103,21 +112,35 @@ public class RoleService {
             dto.setUserName((String) result[6]);
             return dto;
         }).collect(Collectors.toList());
+    }
+    //[Code smell No.2] Long createRole method. Need to extract into smaller methods
 
-        return roleDTOs;
+    // Method 1: createRole method
+    public RoleInterface createRole(RoleDTO roleDTO) {
+        Role role = convertToRoleEntity(roleDTO);
+        Role savedRole = saveRole(role);
+        return applyDecorators(savedRole);
     }
 
-    public RoleInterface createRole(RoleDTO roleDTO) {
+    // Method 2: convertToRoleEntity method
+    private Role convertToRoleEntity(RoleDTO roleDTO) {
         Role role = new Role();
         role.setRoleName(roleDTO.getRoleName());
-        role.setCreatePermission(roleDTO.isCreatePermission());
-        role.setReadPermission(roleDTO.isReadPermission());
-        role.setDeletePermission(roleDTO.isDeletePermission());
-        role.setUpdatePermission(roleDTO.isUpdatePermission());
+        role.setCreatePermission(roleDTO.getCreatePermission());
+        role.setReadPermission(roleDTO.getReadPermission());
+        role.setDeletePermission(roleDTO.getDeletePermission());
+        role.setUpdatePermission(roleDTO.getUpdatePermission());
+        return role;
+    }
 
-        Role savedRole = roleRepository.save(role);
+    // Method 3: saveRole method
+    private Role saveRole(Role role) {
+        return roleRepository.save(role);
+    }
 
-        RoleInterface decoratedRole = (RoleInterface) savedRole;
+    // Method 4: applyDecorators method
+    private RoleInterface applyDecorators(Role role) {
+        RoleInterface decoratedRole = (RoleInterface) role;
         decoratedRole = new LoggingRoleDecorator(decoratedRole);
         decoratedRole = new ValidationRoleDecorator(decoratedRole);
         return decoratedRole;
