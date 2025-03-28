@@ -1,6 +1,27 @@
  
 # Project B: Collaborative Task Management System by Chill Guys
 
+## update since milestone 2
+
+
+## Project Status – Milestone 3
+
+This project is a collaborative task management system developed using Java Spring Boot (backend) and React.js (frontend). It enables users and administrators to manage tasks, assign roles, and interact through a secure platform.
+
+---
+
+## Progress on Functional Requirements
+
+| Requirement | Status | Notes |
+|-------------|--------|-------|
+| **CRUD Operations (Create, Read, Update, Delete) on Tasks** |  Completed | Fully implemented using `TaskService`, `TaskController`, and DTOs. |
+| **Secure Admin Login** |  Completed | JWT-based authentication system using Spring Security. |
+| **Role-Based Access Control** | Partially Completed | Roles and permissions are implemented in backend; admin role management UI is pending. |
+| **Task Locking** | Not Implemented | Lock mechanism for tasks is not yet added; planned for next milestone. |
+| **Task Search Functionality** | Partially Completed | Basic task retrieval implemented; advanced filtering (by date, user, status) is pending. |
+| **Notification System** | Completed (Basic) | Backend logic for sending notifications on role/task updates is in place; frontend display to be integrated. |
+| **Unit Testing** | In Progress | Some tests planned; implementation pending with JUnit and Mockito. |
+
 ## Overview
 The **Collaborative Task Management System** is designed to streamline team-based task assignments, project tracking, and user collaboration. It provides user authentication, role-based access control, and a structured workflow for managing tasks efficiently.
 
