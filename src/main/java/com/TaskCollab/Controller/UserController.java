@@ -5,7 +5,6 @@ import com.TaskCollab.Entity.Role;
 import com.TaskCollab.Service.UserControllerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,47 +20,43 @@ public class UserController {
         this.userControllerService = userControllerService;
     }
 
-    // Get user by ID
+    // GET user by ID
     @GetMapping("/{id}")
     public ResponseEntity<Users> getUserById(@PathVariable Long id) {
         Users user = userControllerService.getUserById(id);
         return (user != null) ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
     }
 
-    // Get all users (Admin Only)
+    // GET all users
     @GetMapping
     public ResponseEntity<List<Users>> getAllUsers() {
         List<Users> users = userControllerService.getAllUsers();
         return ResponseEntity.ok(users);
     }
 
-    // Create User (Admin Only)
+    // POST create user
     @PostMapping("/create")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Users> createUser(@RequestBody Users user) {
         Users createdUser = userControllerService.createUser(user);
         return ResponseEntity.ok(createdUser);
     }
 
-    // Update User
+    // PUT update user
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or authentication.principal.username == #id")
     public ResponseEntity<Users> updateUser(@PathVariable Long id, @RequestBody Users updatedUser) {
         Users user = userControllerService.updateUser(id, updatedUser);
         return (user != null) ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
     }
 
-    // Delete User (Admin Only)
+    // DELETE user
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         boolean deleted = userControllerService.deleteUser(id);
         return deleted ? ResponseEntity.ok("User deleted successfully.") : ResponseEntity.notFound().build();
     }
 
-    // Update User Role (Admin Only)
+    // PUT update user role
     @PutMapping("/{id}/role")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Users> updateUserRole(@PathVariable Long id, @RequestBody Role newRole) {
         Users updatedUser = userControllerService.updateUserRole(id, newRole);
         return (updatedUser != null) ? ResponseEntity.ok(updatedUser) : ResponseEntity.notFound().build();
