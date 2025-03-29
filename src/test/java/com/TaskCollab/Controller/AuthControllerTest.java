@@ -10,16 +10,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-
+import org.springframework.security.core.AuthenticationException; //Import AuthenticationException
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import com.TaskCollab.Service.AuthService; // Import the AuthService
 
 public class AuthControllerTest {
 
@@ -27,10 +22,7 @@ public class AuthControllerTest {
     private AuthController authController;
 
     @Mock
-    private AuthenticationManager authenticationManager;
-
-    @Mock
-    private JwtUtils jwtUtils;
+    private AuthService authService; // Use AuthService mock
 
     @BeforeEach
     void setUp() {
@@ -43,32 +35,54 @@ public class AuthControllerTest {
         loginRequest.setUsername("testUser");
         loginRequest.setPassword("password");
 
-        Authentication authentication = mock(Authentication.class);
-        UserDetails userDetails = new User("testUser", "password", java.util.Collections.emptyList());
-
-        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(authentication);
-        when(authentication.getPrincipal()).thenReturn(userDetails);
-        when(jwtUtils.generateToken(userDetails)).thenReturn("testToken");
+        LoginResponse loginResponse = new LoginResponse("testToken");
+        when(authService.authenticateAndGenerateToken(loginRequest)).thenReturn(loginResponse);
 
         ResponseEntity<?> response = authController.login(loginRequest);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(response.getBody() instanceof LoginResponse);
         assertEquals("testToken", ((LoginResponse) response.getBody()).getToken());
     }
 
     @Test
-    void testLoginFailure() {
+    void testLoginFailureBadCredentials() {
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setUsername("testUser");
         loginRequest.setPassword("wrongPassword");
 
-        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenThrow(new BadCredentialsException("Invalid credentials"));
+        when(authService.authenticateAndGenerateToken(loginRequest)).thenThrow(new BadCredentialsException("Invalid credentials"));
 
         ResponseEntity<?> response = authController.login(loginRequest);
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-        assertEquals("Invalid credentials", response.getBody());
+        assertEquals("Authentication failed: Invalid credentials", response.getBody());
+    }
+
+    @Test
+    void testLoginFailureGeneralAuthenticationException() {
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setUsername("testUser");
+        loginRequest.setPassword("wrongPassword");
+
+        when(authService.authenticateAndGenerateToken(loginRequest)).thenThrow(new AuthenticationException("General Authentication Failure") {});
+
+        ResponseEntity<?> response = authController.login(loginRequest);
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertEquals("Authentication failed: General Authentication Failure", response.getBody());
+    }
+
+    @Test
+    void testLoginFailureOtherException() {
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setUsername("testUser");
+        loginRequest.setPassword("wrongPassword");
+
+        when(authService.authenticateAndGenerateToken(loginRequest)).thenThrow(new RuntimeException("Something unexpected happened"));
+
+        ResponseEntity<?> response = authController.login(loginRequest);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals("An error occured during login.", response.getBody());
     }
 }
-
