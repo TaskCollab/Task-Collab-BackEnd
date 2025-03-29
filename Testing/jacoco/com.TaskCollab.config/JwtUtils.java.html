@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JwtUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Task-Collab</a> &gt; <a href="index.source.html" class="el_package">com.TaskCollab.config</a> &gt; <span class="el_source">JwtUtils.java</span></div><h1>JwtUtils.java</h1><pre class="source lang-java linenums">package com.TaskCollab.config;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+
+import java.security.Key;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Component
+public class JwtUtils {
+
+    private final String secret;
+    private final long expirationMs;
+
+<span class="fc" id="L25">    public JwtUtils(JwtProperties jwtProperties) {</span>
+<span class="fc" id="L26">        this.secret = jwtProperties.getSecret();</span>
+<span class="fc" id="L27">        this.expirationMs = jwtProperties.getExpirationMs();</span>
+<span class="fc" id="L28">    }</span>
+
+    public String generateToken(UserDetails userDetails) {
+<span class="fc" id="L31">        Map&lt;String, Object&gt; claims = new HashMap&lt;&gt;();</span>
+        // Add roles to the JWT claims
+<span class="fc" id="L33">        claims.put(&quot;roles&quot;, userDetails.getAuthorities().stream()</span>
+<span class="fc" id="L34">                .map(GrantedAuthority::getAuthority)</span>
+<span class="fc" id="L35">                .collect(Collectors.toList()));</span>
+
+        // Keys.hmacShaKeyFor for creating a secure signing key
+<span class="fc" id="L38">        Key signingKey = Keys.hmacShaKeyFor(secret.getBytes());</span>
+
+<span class="fc" id="L40">        return Jwts.builder()</span>
+<span class="fc" id="L41">                .setClaims(claims)</span>
+<span class="fc" id="L42">                .setSubject(userDetails.getUsername())</span>
+<span class="fc" id="L43">                .setIssuedAt(new Date())</span>
+<span class="fc" id="L44">                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))</span>
+<span class="fc" id="L45">                .signWith(signingKey, SignatureAlgorithm.HS512)</span>
+<span class="fc" id="L46">                .compact();</span>
+    }
+
+
+    private Boolean isTokenExpired(Claims claims) {
+<span class="fc" id="L51">            return extractExpiration(claims).before(new Date());</span>
+    }
+
+ 
+
+    public Date extractExpiration(Claims claims) {
+<span class="fc" id="L57">        return claims.getExpiration(); // Extract expiration</span>
+    }
+    
+
+    private Claims extractAllClaims(String token) {
+<span class="fc" id="L62">        return Jwts.parserBuilder() // Use parserBuilder</span>
+<span class="fc" id="L63">                .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes())) // Use getBytes()</span>
+<span class="fc" id="L64">                .build()</span>
+<span class="fc" id="L65">                .parseClaimsJws(token)</span>
+<span class="fc" id="L66">                .getBody();</span>
+    }
+
+    public String extractUsername(String token) {
+<span class="fc" id="L70">        return Jwts.parserBuilder() // Use parserBuilder</span>
+<span class="fc" id="L71">                .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes())) // Use getBytes()</span>
+<span class="fc" id="L72">                .build()</span>
+<span class="fc" id="L73">                .parseClaimsJws(token)</span>
+<span class="fc" id="L74">                .getBody()</span>
+<span class="fc" id="L75">                .getSubject();</span>
+    }
+
+    public boolean validateToken(String token) {
+        try {
+<span class="fc" id="L80">            Claims claims = extractAllClaims(token);</span>
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">            return !isTokenExpired(claims);</span>
+<span class="nc" id="L82">        } catch (SignatureException e) {</span>
+<span class="nc" id="L83">            System.out.println(&quot;Invalid JWT signature: &quot; + e.getMessage());</span>
+<span class="fc" id="L84">        } catch (Exception e) {</span>
+<span class="fc" id="L85">            System.out.println(&quot;JWT validation error: &quot; + e.getMessage());</span>
+<span class="nc" id="L86">        }</span>
+<span class="fc" id="L87">        return false;</span>
+    }
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

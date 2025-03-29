@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TaskDecorator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Task-Collab</a> &gt; <a href="index.source.html" class="el_package">com.TaskCollab.Decorator</a> &gt; <span class="el_source">TaskDecorator.java</span></div><h1>TaskDecorator.java</h1><pre class="source lang-java linenums">package com.TaskCollab.Decorator;
+
+import com.TaskCollab.Entity.TaskInterface;
+import java.time.LocalDateTime;
+
+public abstract class TaskDecorator implements TaskInterface {
+    protected TaskInterface decoratedTask;
+
+<span class="fc" id="L9">    public TaskDecorator(TaskInterface decoratedTask) {</span>
+<span class="fc" id="L10">        this.decoratedTask = decoratedTask;</span>
+<span class="fc" id="L11">    }</span>
+
+    @Override
+    public Long getTask_Id() {
+<span class="fc" id="L15">        return decoratedTask.getTask_Id();</span>
+    }
+
+    @Override
+    public void setTask_Id(Long task_Id) {
+<span class="fc" id="L20">        decoratedTask.setTask_Id(task_Id);</span>
+<span class="fc" id="L21">    }</span>
+
+    @Override
+    public String getTask_Title() {
+<span class="fc" id="L25">        return decoratedTask.getTask_Title();</span>
+    }
+
+    @Override
+    public void setTask_Title(String task_Title) {
+<span class="fc" id="L30">        decoratedTask.setTask_Title(task_Title);</span>
+<span class="fc" id="L31">    }</span>
+
+    @Override
+    public String getDescription() {
+<span class="fc" id="L35">        return decoratedTask.getDescription();</span>
+    }
+
+    @Override
+    public void setDescription(String description) {
+<span class="fc" id="L40">        decoratedTask.setDescription(description);</span>
+<span class="fc" id="L41">    }</span>
+
+    @Override
+    public String getAssigned_To() {
+<span class="fc" id="L45">        return decoratedTask.getAssigned_To();</span>
+    }
+
+    @Override
+    public void setAssigned_To(String assigned_To) {
+<span class="fc" id="L50">        decoratedTask.setAssigned_To(assigned_To);</span>
+<span class="fc" id="L51">    }</span>
+
+    @Override
+    public String getStatus() {
+<span class="fc" id="L55">        return decoratedTask.getStatus();</span>
+    }
+
+    @Override
+    public void setStatus(String status) {
+<span class="fc" id="L60">        decoratedTask.setStatus(status);</span>
+<span class="fc" id="L61">    }</span>
+
+    @Override
+    public LocalDateTime getDeadline() {
+<span class="fc" id="L65">        return decoratedTask.getDeadline();</span>
+    }
+
+    @Override
+    public void setDeadline(LocalDateTime deadline) {
+<span class="fc" id="L70">        decoratedTask.setDeadline(deadline);</span>
+<span class="fc" id="L71">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

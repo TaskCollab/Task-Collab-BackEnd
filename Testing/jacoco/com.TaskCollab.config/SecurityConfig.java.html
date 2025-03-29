@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SecurityConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Task-Collab</a> &gt; <a href="index.source.html" class="el_package">com.TaskCollab.config</a> &gt; <span class="el_source">SecurityConfig.java</span></div><h1>SecurityConfig.java</h1><pre class="source lang-java linenums">package com.TaskCollab.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import com.TaskCollab.Security.JwtAuthFilter;
+
+import com.TaskCollab.Service.UserService;
+
+import java.util.List;
+
+@Configuration
+@EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true) // Enable @PreAuthorize annotations
+public class SecurityConfig {
+
+    private final UserService userDetailsService;
+    private final JwtUtils jwtUtils;
+    private final JwtAuthFilter jwtAuthFilter;
+
+    // ✅ Constructor Injection
+<span class="nc" id="L35">    public SecurityConfig(UserService userDetailsService, JwtUtils jwtUtils, JwtAuthFilter jwtAuthFilter) {</span>
+<span class="nc" id="L36">        this.userDetailsService = userDetailsService;</span>
+<span class="nc" id="L37">        this.jwtUtils = jwtUtils;</span>
+<span class="nc" id="L38">        this.jwtAuthFilter = jwtAuthFilter;</span>
+<span class="nc" id="L39">    }</span>
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+<span class="nc" id="L43">        return http</span>
+<span class="nc" id="L44">            .csrf(csrf -&gt; csrf.disable())</span>
+<span class="nc" id="L45">            .cors(cors -&gt; cors.configure(http)) // This enables CORS</span>
+<span class="nc" id="L46">            .sessionManagement(session -&gt; session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))</span>
+<span class="nc" id="L47">            .authorizeHttpRequests(auth -&gt; auth</span>
+<span class="nc" id="L48">                .requestMatchers(&quot;/api/auth/**&quot;).permitAll()</span>
+<span class="nc" id="L49">                .anyRequest().authenticated()</span>
+            )
+<span class="nc" id="L51">            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)</span>
+<span class="nc" id="L52">            .build();</span>
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+<span class="nc" id="L57">        return new BCryptPasswordEncoder(); // Secure password hashing</span>
+    }
+
+    // CORS Configuration
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+<span class="nc" id="L63">        CorsConfiguration configuration = new CorsConfiguration();</span>
+<span class="nc" id="L64">        configuration.setAllowedOrigins(List.of(&quot;http://localhost:3000&quot;)); // Allow all origins</span>
+<span class="nc" id="L65">        configuration.setAllowedMethods(List.of(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;));</span>
+<span class="nc" id="L66">        configuration.setAllowedHeaders(List.of(&quot;*&quot;));</span>
+<span class="nc" id="L67">        configuration.setAllowCredentials(true);</span>
+
+<span class="nc" id="L69">        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();</span>
+<span class="nc" id="L70">        source.registerCorsConfiguration(&quot;/**&quot;, configuration);</span>
+<span class="nc" id="L71">        return source;</span>
+    }
+
+    // Authentication Manager (needed for login endpoint)
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+<span class="nc" id="L77">        return http.getSharedObject(AuthenticationManagerBuilder.class)</span>
+<span class="nc" id="L78">                   .userDetailsService(userDetailsService)</span>
+<span class="nc" id="L79">                   .passwordEncoder(passwordEncoder())</span>
+<span class="nc" id="L80">                   .and()</span>
+<span class="nc" id="L81">                   .build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

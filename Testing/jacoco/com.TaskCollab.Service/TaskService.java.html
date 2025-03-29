@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TaskService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Task-Collab</a> &gt; <a href="index.source.html" class="el_package">com.TaskCollab.Service</a> &gt; <span class="el_source">TaskService.java</span></div><h1>TaskService.java</h1><pre class="source lang-java linenums">package com.TaskCollab.Service;
+
+import com.TaskCollab.Decorator.LoggingTaskDecorator;
+import com.TaskCollab.Decorator.ValidationTaskDecorator;
+import com.TaskCollab.dto.TaskDTO;
+import com.TaskCollab.Entity.Task;
+import com.TaskCollab.Entity.TaskInterface;
+import com.TaskCollab.dao.TaskRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+<span class="fc" id="L16">public class TaskService {</span>
+
+    @Autowired
+    private TaskRepository taskRepository;
+
+    // Retrieve a specific task by its ID
+    public TaskInterface getTaskById(Long taskId) {
+<span class="fc" id="L23">        Optional&lt;Task&gt; taskOpt = taskRepository.findById(taskId);</span>
+<span class="fc" id="L24">        return taskOpt.map(task -&gt; {</span>
+<span class="fc" id="L25">            TaskInterface decoratedTask = task;</span>
+<span class="fc" id="L26">            decoratedTask = new LoggingTaskDecorator(decoratedTask);</span>
+<span class="fc" id="L27">            decoratedTask = new ValidationTaskDecorator(decoratedTask);</span>
+<span class="fc" id="L28">            return decoratedTask;</span>
+<span class="fc" id="L29">        }).orElse(null);</span>
+    }
+
+    // Create a new task
+    public TaskInterface createTask(TaskDTO taskDTO) {
+<span class="fc" id="L34">        Task task = new Task();</span>
+<span class="fc" id="L35">        task.setTask_Title(taskDTO.getTaskTitle());</span>
+<span class="fc" id="L36">        task.setDescription(taskDTO.getDescription());</span>
+<span class="fc" id="L37">        task.setAssigned_To(taskDTO.getAssignedTo());</span>
+<span class="fc" id="L38">        task.setStatus(taskDTO.getStatus());</span>
+<span class="fc" id="L39">        task.setDeadline(taskDTO.getDeadline());</span>
+
+<span class="fc" id="L41">        Task savedTask = taskRepository.save(task);</span>
+
+<span class="fc" id="L43">        TaskInterface decoratedTask = savedTask;</span>
+<span class="fc" id="L44">        decoratedTask = new LoggingTaskDecorator(decoratedTask);</span>
+<span class="fc" id="L45">        decoratedTask = new ValidationTaskDecorator(decoratedTask);</span>
+<span class="fc" id="L46">        return decoratedTask;</span>
+    }
+
+    // Update existing task by ID
+    public TaskInterface updateTask(Long taskId, TaskDTO taskDTO) {
+<span class="fc" id="L51">        Optional&lt;Task&gt; existingTaskOpt = taskRepository.findById(taskId);</span>
+<span class="fc" id="L52">        return existingTaskOpt.map(existingTask -&gt; {</span>
+<span class="fc" id="L53">            existingTask.setTask_Title(taskDTO.getTaskTitle());</span>
+<span class="fc" id="L54">            existingTask.setDescription(taskDTO.getDescription());</span>
+<span class="fc" id="L55">            existingTask.setAssigned_To(taskDTO.getAssignedTo());</span>
+<span class="fc" id="L56">            existingTask.setStatus(taskDTO.getStatus());</span>
+<span class="fc" id="L57">            existingTask.setDeadline(taskDTO.getDeadline());</span>
+
+<span class="fc" id="L59">            Task updatedTask = taskRepository.save(existingTask);</span>
+<span class="fc" id="L60">            TaskInterface decoratedTask = updatedTask;</span>
+<span class="fc" id="L61">            decoratedTask = new LoggingTaskDecorator(decoratedTask);</span>
+<span class="fc" id="L62">            decoratedTask = new ValidationTaskDecorator(decoratedTask);</span>
+<span class="fc" id="L63">            return decoratedTask;</span>
+<span class="fc" id="L64">        }).orElse(null);</span>
+    }
+
+    // Delete task by ID
+    public boolean deleteTask(Long task_Id) {
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">        if (taskRepository.findById(task_Id).isPresent()) {</span>
+<span class="fc" id="L70">            taskRepository.deleteById(task_Id);</span>
+<span class="fc" id="L71">            System.out.println(&quot;Deleted Task with ID: &quot; + task_Id);</span>
+<span class="fc" id="L72">            return true;</span>
+        }
+<span class="nc" id="L74">        System.out.println(&quot;Task ID &quot; + task_Id + &quot; not found.&quot;);</span>
+<span class="nc" id="L75">        return false;</span>
+    }
+
+    public List&lt;TaskInterface&gt; getTasksByUsername(String username) {
+<span class="fc" id="L79">        List&lt;Task&gt; tasks = taskRepository.findByAssigned_To(username);</span>
+<span class="fc" id="L80">        return tasks.stream().map(task -&gt; {</span>
+<span class="fc" id="L81">            TaskInterface decoratedTask = task;</span>
+<span class="fc" id="L82">            decoratedTask = new LoggingTaskDecorator(decoratedTask);</span>
+<span class="fc" id="L83">            decoratedTask = new ValidationTaskDecorator(decoratedTask);</span>
+<span class="fc" id="L84">            return decoratedTask;</span>
+<span class="fc" id="L85">        }).collect(Collectors.toList());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

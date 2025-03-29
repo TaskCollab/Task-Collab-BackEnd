@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RoleService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Task-Collab</a> &gt; <a href="index.source.html" class="el_package">com.TaskCollab.Service</a> &gt; <span class="el_source">RoleService.java</span></div><h1>RoleService.java</h1><pre class="source lang-java linenums">package com.TaskCollab.Service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+
+import com.TaskCollab.Decorator.LoggingRoleDecorator;
+import com.TaskCollab.Decorator.ValidationRoleDecorator;
+import com.TaskCollab.Entity.Role;
+import com.TaskCollab.Entity.RoleInterface;
+import com.TaskCollab.Entity.Users;
+import com.TaskCollab.dao.RoleRepository;
+import com.TaskCollab.dto.RoleDTO;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+
+@Service
+<span class="fc" id="L30">public class RoleService {</span>
+
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;  // Inject EntityManager
+
+    // [Code smell No.1] Long searchRoles method. Need to extract into smaller methods
+
+    // Method 1: searchRoles method
+    public Collection&lt;RoleDTO&gt; searchRoles(Integer roleId, String roleName, 
+            Boolean createPermission, Boolean readPermission, 
+            Boolean deletePermission, Boolean updatePermission, String userName) {
+        
+<span class="fc" id="L45">        CriteriaBuilder cb = entityManager.getCriteriaBuilder();</span>
+<span class="fc" id="L46">        CriteriaQuery&lt;Object[]&gt; cq = cb.createQuery(Object[].class);</span>
+<span class="fc" id="L47">        Root&lt;Role&gt; role = cq.from(Role.class);</span>
+        
+<span class="fc" id="L49">        Join&lt;Role, Users&gt; userJoin = createUserJoin(role, userName);</span>
+<span class="fc" id="L50">        List&lt;Predicate&gt; predicates = buildSearchPredicates(cb, role, userJoin, roleId, roleName, </span>
+        createPermission, readPermission, 
+        deletePermission, updatePermission, userName);
+
+<span class="fc" id="L54">        List&lt;Object[]&gt; results = executeSearchQuery(cb, cq, role, userJoin, predicates);</span>
+
+<span class="fc" id="L56">        return mapToRoleDTOs(results);</span>
+    }
+    // Method 2: createUserJoin method
+    private Join&lt;Role, Users&gt; createUserJoin(Root&lt;Role&gt; role, String userName) {
+<span class="pc bpc" id="L60" title="1 of 4 branches missed.">        return (userName != null &amp;&amp; !userName.trim().isEmpty()) </span>
+<span class="fc" id="L61">                ? role.join(&quot;users&quot;, JoinType.INNER) </span>
+<span class="fc" id="L62">                : role.join(&quot;users&quot;, JoinType.LEFT);</span>
+    }
+    
+    // Method 3: buildSearchPredicates method
+    private List&lt;Predicate&gt; buildSearchPredicates(CriteriaBuilder cb, Root&lt;Role&gt; role, Join&lt;Role, Users&gt; userJoin, 
+                                                  Integer roleId, String roleName, Boolean createPermission, 
+                                                  Boolean readPermission, Boolean deletePermission, 
+                                                  Boolean updatePermission, String userName) {
+<span class="fc" id="L70">        List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();</span>
+
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">        if (roleId != null) predicates.add(cb.equal(role.get(&quot;roleId&quot;), roleId));</span>
+<span class="pc bpc" id="L73" title="1 of 4 branches missed.">        if (roleName != null &amp;&amp; !roleName.trim().isEmpty()) </span>
+<span class="fc" id="L74">            predicates.add(cb.equal(cb.lower(role.get(&quot;roleName&quot;)), roleName.toLowerCase()));</span>
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">        if (createPermission != null) predicates.add(cb.equal(role.get(&quot;createPermission&quot;), createPermission));</span>
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">        if (readPermission != null) predicates.add(cb.equal(role.get(&quot;readPermission&quot;), readPermission));</span>
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">        if (deletePermission != null) predicates.add(cb.equal(role.get(&quot;deletePermission&quot;), deletePermission));</span>
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">        if (updatePermission != null) predicates.add(cb.equal(role.get(&quot;updatePermission&quot;), updatePermission));</span>
+<span class="pc bpc" id="L79" title="1 of 4 branches missed.">        if (userName != null &amp;&amp; !userName.trim().isEmpty()) </span>
+<span class="fc" id="L80">            predicates.add(cb.equal(cb.lower(userJoin.get(&quot;username&quot;)), userName.toLowerCase()));</span>
+
+<span class="fc" id="L82">        return predicates;</span>
+    }
+
+    // Method 4: executeSearchQuery method
+    private List&lt;Object[]&gt; executeSearchQuery(CriteriaBuilder cb, CriteriaQuery&lt;Object[]&gt; cq, 
+                                              Root&lt;Role&gt; role, Join&lt;Role, Users&gt; userJoin, 
+                                              List&lt;Predicate&gt; predicates) {
+<span class="fc" id="L89">        cq.multiselect(</span>
+<span class="fc" id="L90">            role.get(&quot;roleId&quot;),</span>
+<span class="fc" id="L91">            role.get(&quot;roleName&quot;),</span>
+<span class="fc" id="L92">            role.get(&quot;createPermission&quot;),</span>
+<span class="fc" id="L93">            role.get(&quot;readPermission&quot;),</span>
+<span class="fc" id="L94">            role.get(&quot;deletePermission&quot;),</span>
+<span class="fc" id="L95">            role.get(&quot;updatePermission&quot;),</span>
+<span class="fc" id="L96">            userJoin.get(&quot;username&quot;)</span>
+<span class="fc" id="L97">        ).where(predicates.toArray(new Predicate[0]));</span>
+
+<span class="fc" id="L99">        return entityManager.createQuery(cq).getResultList();</span>
+    }
+
+    // Method 5: mapToRoleDTOs method
+    private List&lt;RoleDTO&gt; mapToRoleDTOs(List&lt;Object[]&gt; results) {
+<span class="fc" id="L104">        return results.stream().map(result -&gt; {</span>
+<span class="fc" id="L105">            RoleDTO dto = new RoleDTO();</span>
+<span class="fc" id="L106">            dto.setRoleId((Integer) result[0]);</span>
+<span class="fc" id="L107">            dto.setRoleName((String) result[1]);</span>
+<span class="fc" id="L108">            dto.setCreatePermission((Boolean) result[2]);</span>
+<span class="fc" id="L109">            dto.setReadPermission((Boolean) result[3]);</span>
+<span class="fc" id="L110">            dto.setDeletePermission((Boolean) result[4]);</span>
+<span class="fc" id="L111">            dto.setUpdatePermission((Boolean) result[5]);</span>
+<span class="fc" id="L112">            dto.setUserName((String) result[6]);</span>
+<span class="fc" id="L113">            return dto;</span>
+<span class="fc" id="L114">        }).collect(Collectors.toList());</span>
+    }
+    //[Code smell No.2] Long createRole method. Need to extract into smaller methods
+
+    // Method 1: createRole method
+    public RoleInterface createRole(RoleDTO roleDTO) {
+<span class="fc" id="L120">        Role role = convertToRoleEntity(roleDTO);</span>
+<span class="fc" id="L121">        Role savedRole = saveRole(role);</span>
+<span class="fc" id="L122">        return applyDecorators(savedRole);</span>
+    }
+
+    // Method 2: convertToRoleEntity method
+    private Role convertToRoleEntity(RoleDTO roleDTO) {
+<span class="fc" id="L127">        Role role = new Role();</span>
+<span class="fc" id="L128">        role.setRoleName(roleDTO.getRoleName());</span>
+<span class="fc" id="L129">        role.setCreatePermission(roleDTO.getCreatePermission());</span>
+<span class="fc" id="L130">        role.setReadPermission(roleDTO.getReadPermission());</span>
+<span class="fc" id="L131">        role.setDeletePermission(roleDTO.getDeletePermission());</span>
+<span class="fc" id="L132">        role.setUpdatePermission(roleDTO.getUpdatePermission());</span>
+<span class="fc" id="L133">        return role;</span>
+    }
+
+    // Method 3: saveRole method
+    private Role saveRole(Role role) {
+<span class="fc" id="L138">        return roleRepository.save(role);</span>
+    }
+
+    // Method 4: applyDecorators method
+    private RoleInterface applyDecorators(Role role) {
+<span class="fc" id="L143">        RoleInterface decoratedRole = (RoleInterface) role;</span>
+<span class="fc" id="L144">        decoratedRole = new LoggingRoleDecorator(decoratedRole);</span>
+<span class="fc" id="L145">        decoratedRole = new ValidationRoleDecorator(decoratedRole);</span>
+<span class="fc" id="L146">        return decoratedRole;</span>
+    }
+
+    public boolean deleteRole(String roleName) {
+<span class="fc bfc" id="L150" title="All 2 branches covered.">        if (roleRepository.findByRoleName(roleName).isPresent()) {</span>
+            // Assuming your Role entity has a getRoleId() method:
+<span class="fc" id="L152">            Integer roleId = roleRepository.findByRoleName(roleName).get().getRoleId();</span>
+<span class="fc" id="L153">            roleRepository.deleteById(roleId);</span>
+<span class="fc" id="L154">            System.out.println(&quot;Deleted Role with ID: &quot; + roleId);</span>
+<span class="fc" id="L155">            return true;</span>
+        }
+<span class="fc" id="L157">        System.out.println(&quot;Role with name &quot; + roleName + &quot; not found&quot;);</span>
+<span class="fc" id="L158">        return false;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

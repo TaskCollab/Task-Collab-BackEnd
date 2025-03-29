@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TaskController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Task-Collab</a> &gt; <a href="index.source.html" class="el_package">com.TaskCollab.Controller</a> &gt; <span class="el_source">TaskController.java</span></div><h1>TaskController.java</h1><pre class="source lang-java linenums">package com.TaskCollab.Controller;
+
+import com.TaskCollab.dto.TaskDTO;
+import com.TaskCollab.Entity.Task;
+import com.TaskCollab.Entity.TaskInterface;
+import com.TaskCollab.Service.SearchService;
+import com.TaskCollab.Service.TaskService;
+import com.TaskCollab.config.JwtProperties;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping(&quot;/api/tasks&quot;)
+<span class="fc" id="L23">public class TaskController {</span>
+
+    @Autowired
+    private TaskService taskService;
+
+    @Autowired
+    private JwtProperties jwtProperties;
+
+    @Autowired
+    private SearchService searchService; // Injecting the service correctly
+
+    @PostMapping(&quot;/search&quot;) // Change to POST to accept JSON body
+    public ResponseEntity&lt;List&lt;TaskDTO&gt;&gt; searchTasks(@RequestBody TaskDTO searchCriteria) { // Accept JSON body
+<span class="nc" id="L36">        String taskTitle = searchCriteria.getTaskTitle();</span>
+<span class="nc" id="L37">        String description = searchCriteria.getDescription();</span>
+<span class="nc" id="L38">        String assignedTo = searchCriteria.getAssignedTo();</span>
+<span class="nc" id="L39">        String status = searchCriteria.getStatus();</span>
+<span class="nc" id="L40">        String deadline = null;</span>
+
+<span class="nc bnc" id="L42" title="All 2 branches missed.">        if (searchCriteria.getDeadline() != null){</span>
+<span class="nc" id="L43">            deadline = searchCriteria.getDeadline().toString();</span>
+        } 
+    
+<span class="nc" id="L46">        List&lt;TaskDTO&gt; tasks = searchService.searchTasks(taskTitle, description, assignedTo, status, deadline)</span>
+<span class="nc" id="L47">                .stream()</span>
+<span class="nc" id="L48">                .map(this::convertToDTO)</span>
+<span class="nc" id="L49">                .collect(Collectors.toList());</span>
+    
+<span class="nc" id="L51">        return ResponseEntity.ok(tasks);</span>
+    }
+
+    // POST request to retrieve a task by ID
+    @PostMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;TaskDTO&gt; getTask(@PathVariable Long id) {
+<span class="fc" id="L57">        TaskInterface task = taskService.getTaskById(id);</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        if (task != null) {</span>
+<span class="fc" id="L59">            return ResponseEntity.ok(convertToDTO(task)); // Convert TaskInterface to TaskDTO</span>
+        } else {
+<span class="fc" id="L61">            return ResponseEntity.notFound().build();</span>
+        }
+    }
+
+    // PUT request to update a task by ID
+    @PutMapping(&quot;/update/{id}&quot;)
+    public ResponseEntity&lt;TaskDTO&gt; updateTask(@PathVariable Long id, @RequestBody TaskDTO taskDTO) {
+<span class="fc" id="L68">        TaskInterface updatedTask = taskService.updateTask(id, taskDTO);</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if (updatedTask != null) {</span>
+<span class="fc" id="L70">            return ResponseEntity.ok(convertToDTO(updatedTask)); // Convert TaskInterface to TaskDTO</span>
+        } else {
+<span class="fc" id="L72">            return ResponseEntity.notFound().build();</span>
+        }
+    }
+
+    // POST request to create a new task
+    @PostMapping(&quot;/create&quot;)
+    public ResponseEntity&lt;TaskDTO&gt; createTask(@RequestBody TaskDTO taskDTO) {
+<span class="fc" id="L79">        TaskInterface createdTask = taskService.createTask(taskDTO);</span>
+<span class="fc" id="L80">        return ResponseEntity.status(HttpStatus.CREATED).body(convertToDTO(createdTask)); // Convert TaskInterface to TaskDTO</span>
+    }
+
+    // DELETE request to delete a task by ID
+    @PostMapping(&quot;/delete/{task_Id}&quot;)
+    public ResponseEntity&lt;String&gt; deleteTask(@PathVariable Long task_Id) {
+<span class="fc" id="L86">        boolean deleted = taskService.deleteTask(task_Id);</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">        if (deleted) {</span>
+<span class="fc" id="L88">            return ResponseEntity.ok(&quot;Task deleted successfully.&quot;);</span>
+        } else {
+<span class="fc" id="L90">            return ResponseEntity.notFound().build();</span>
+        }
+    }
+
+    @GetMapping(&quot;/my-tasks&quot;)
+    public ResponseEntity&lt;List&lt;TaskDTO&gt;&gt; getMyTasks(HttpServletRequest request) {
+<span class="fc" id="L96">        String token = request.getHeader(&quot;Authorization&quot;).substring(7);</span>
+<span class="fc" id="L97">        String secret = jwtProperties.getSecret();</span>
+<span class="fc" id="L98">        String username = Jwts.parserBuilder()</span>
+<span class="fc" id="L99">                .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes()))</span>
+<span class="fc" id="L100">                .build()</span>
+<span class="fc" id="L101">                .parseClaimsJws(token)</span>
+<span class="fc" id="L102">                .getBody()</span>
+<span class="fc" id="L103">                .getSubject();</span>
+
+<span class="fc" id="L105">        List&lt;TaskInterface&gt; userTasks = taskService.getTasksByUsername(username);</span>
+<span class="fc" id="L106">        List&lt;TaskDTO&gt; taskDTOs = userTasks.stream()</span>
+<span class="fc" id="L107">                .map(this::convertToDTO)</span>
+<span class="fc" id="L108">                .collect(Collectors.toList());</span>
+
+<span class="fc" id="L110">        return ResponseEntity.ok(taskDTOs);</span>
+    }
+
+    // Helper method to convert TaskInterface to TaskDTO
+    private TaskDTO convertToDTO(TaskInterface task) {
+<span class="fc" id="L115">        TaskDTO dto = new TaskDTO();</span>
+<span class="fc" id="L116">        dto.setId(task.getTask_Id());</span>
+<span class="fc" id="L117">        dto.setTaskTitle(task.getTask_Title());</span>
+<span class="fc" id="L118">        dto.setDescription(task.getDescription());</span>
+<span class="fc" id="L119">        dto.setAssignedTo(task.getAssigned_To());</span>
+<span class="fc" id="L120">        dto.setStatus(task.getStatus());</span>
+<span class="fc" id="L121">        dto.setDeadline(task.getDeadline());</span>
+<span class="fc" id="L122">        return dto;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
