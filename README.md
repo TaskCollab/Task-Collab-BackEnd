@@ -133,7 +133,11 @@ Avoids the creation of numerous subclasses for each combination of features.
 - **Security:** Configure JWT authentication and authorization (e.g., `SecurityConfig`, `JwtUtils`, `JwtAuthFilter`).
 - **DTOs:** Classes such as `TaskDTO`, `LoginRequest`, and `LoginResponse` for data transfer between layers.
 
+## Testing and Coverage
 
+This project includes comprehensive unit and integration tests to ensure code quality and reliability. Test results, including code coverage metrics, are generated using JaCoCo. 
+
+You can find the detailed JaCoCo report in the `testing/jacoco/index.html` file within the repository. Open this file in your web browser to view the coverage results.
 
 ## Known Bugs and Issues
 
