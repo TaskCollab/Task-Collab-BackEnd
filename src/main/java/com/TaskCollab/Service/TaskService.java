@@ -5,9 +5,12 @@ import com.TaskCollab.Decorator.ValidationTaskDecorator;
 import com.TaskCollab.dto.TaskDTO;
 import com.TaskCollab.Entity.Task;
 import com.TaskCollab.Entity.TaskInterface;
+import com.TaskCollab.Entity.Users;
 import com.TaskCollab.dao.TaskRepository;
+import com.TaskCollab.dao.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -16,7 +19,13 @@ import java.util.stream.Collectors;
 public class TaskService {
 
     @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
     private TaskRepository taskRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     // Retrieve a specific task by its ID
     public TaskInterface getTaskById(Long taskId) {
@@ -49,6 +58,7 @@ public class TaskService {
     // Update existing task by ID
     public TaskInterface updateTask(Long taskId, TaskDTO taskDTO) {
         Optional<Task> existingTaskOpt = taskRepository.findById(taskId);
+
         return existingTaskOpt.map(existingTask -> {
             existingTask.setTask_Title(taskDTO.getTaskTitle());
             existingTask.setDescription(taskDTO.getDescription());
@@ -57,9 +67,21 @@ public class TaskService {
             existingTask.setDeadline(taskDTO.getDeadline());
 
             Task updatedTask = taskRepository.save(existingTask);
+
+            // Lookup user by username to get userId for notification
+            Users user = userRepository.findByUsername(updatedTask.getAssigned_To()).orElse(null);
+            if (user != null) {
+                notificationService.sendNotification(
+                    user.getUserId(),
+                    "Task '" + updatedTask.getTask_Title() + "' has been updated."
+                );
+            }
+
+            // Decorate the task
             TaskInterface decoratedTask = updatedTask;
             decoratedTask = new LoggingTaskDecorator(decoratedTask);
             decoratedTask = new ValidationTaskDecorator(decoratedTask);
+
             return decoratedTask;
         }).orElse(null);
     }

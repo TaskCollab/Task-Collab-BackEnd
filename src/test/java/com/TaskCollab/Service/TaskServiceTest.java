@@ -2,7 +2,9 @@ package com.TaskCollab.Service;
 
 import com.TaskCollab.Entity.Task;
 import com.TaskCollab.Entity.TaskInterface;
+import com.TaskCollab.Entity.Users;
 import com.TaskCollab.dao.TaskRepository;
+import com.TaskCollab.dao.UserRepository;
 import com.TaskCollab.dto.TaskDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +19,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,6 +29,12 @@ class TaskServiceTest {
 
     @Mock
     private TaskRepository taskRepository;
+    @Mock
+private NotificationService notificationService;
+
+@Mock
+private UserRepository userRepository;
+
 
     @InjectMocks
     private TaskService taskService;
@@ -69,22 +80,30 @@ class TaskServiceTest {
     }
 
     @Test
-    void testUpdateTask() {
-        TaskDTO taskDTO = new TaskDTO();
-        taskDTO.setTaskTitle("Updated Task");
-        taskDTO.setDescription("Updated Description");
-        taskDTO.setAssignedTo("user3");
-        taskDTO.setStatus("Completed");
+void testUpdateTask() {
+    TaskDTO taskDTO = new TaskDTO();
+    taskDTO.setTaskTitle("Updated Task");
+    taskDTO.setDescription("Updated Description");
+    taskDTO.setAssignedTo("user3");
+    taskDTO.setStatus("Completed");
 
-        when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
-        when(taskRepository.save(any(Task.class))).thenReturn(task);
+    Users user = new Users();
+    user.setUserId(99L);
+    user.setUsername("user3");
 
-        TaskInterface updatedTask = taskService.updateTask(1L, taskDTO);
+    when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
+    when(userRepository.findByUsername("user3")).thenReturn(Optional.of(user));
+    when(taskRepository.save(any(Task.class))).thenReturn(task);
 
-        assertNotNull(updatedTask);
-        assertEquals("Updated Task", updatedTask.getTask_Title());
-        assertEquals("Updated Description", updatedTask.getDescription());
-    }
+    TaskInterface updatedTask = taskService.updateTask(1L, taskDTO);
+
+    assertNotNull(updatedTask);
+    assertEquals("Updated Task", updatedTask.getTask_Title());
+    assertEquals("Updated Description", updatedTask.getDescription());
+
+    // Verify notification was sent
+    verify(notificationService, times(1)).sendNotification(eq(99L), contains("Updated Task"));
+}
 
     @Test
     void testDeleteTask() {
