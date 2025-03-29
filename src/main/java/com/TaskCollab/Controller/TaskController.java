@@ -1,20 +1,22 @@
 package com.TaskCollab.Controller;
 
 import com.TaskCollab.dto.TaskDTO;
-import com.TaskCollab.Entity.Task;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+
 import com.TaskCollab.Entity.TaskInterface;
 import com.TaskCollab.Service.SearchService;
 import com.TaskCollab.Service.TaskService;
 import com.TaskCollab.config.JwtProperties;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
+import jakarta.servlet.http.HttpServletRequest;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeMap; // Import TypeMap
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,64 +28,67 @@ public class TaskController {
     private TaskService taskService;
 
     @Autowired
+    private SearchService searchService;
+
+
+
+    @Autowired
     private JwtProperties jwtProperties;
 
     @Autowired
-    private SearchService searchService; // Injecting the service correctly
+    private ModelMapper modelMapper;
 
-    @PostMapping("/search") // Change to POST to accept JSON body
-    public ResponseEntity<List<TaskDTO>> searchTasks(@RequestBody TaskDTO searchCriteria) { // Accept JSON body
-        String taskTitle = searchCriteria.getTaskTitle();
-        String description = searchCriteria.getDescription();
-        String assignedTo = searchCriteria.getAssignedTo();
-        String status = searchCriteria.getStatus();
-        String deadline = null;
+    // Configure ModelMapper for TaskInterface to TaskDTO mapping
+    @Autowired
+    public TaskController(ModelMapper modelMapper) {
+        this.modelMapper = modelMapper;
+        TypeMap<TaskInterface, TaskDTO> typeMap = modelMapper.createTypeMap(TaskInterface.class, TaskDTO.class);
+    }
 
-        if (searchCriteria.getDeadline() != null){
-            deadline = searchCriteria.getDeadline().toString();
-        } 
-    
-        List<TaskDTO> tasks = searchService.searchTasks(taskTitle, description, assignedTo, status, deadline)
-                .stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    
+    @PostMapping("/search")
+    public ResponseEntity<List<TaskDTO>> searchTasks(@RequestBody TaskDTO searchCriteria) {
+        List<TaskDTO> tasks = searchService.searchTasks(
+                searchCriteria.getTaskTitle(),
+                searchCriteria.getDescription(),
+                searchCriteria.getAssignedTo(),
+                searchCriteria.getStatus(),
+                searchCriteria.getDeadline() != null ? searchCriteria.getDeadline().toString() : null
+        ).stream()
+         .map(task -> modelMapper.map(task, TaskDTO.class))
+         .collect(Collectors.toList());
+
         return ResponseEntity.ok(tasks);
     }
 
-    // POST request to retrieve a task by ID
-    @PostMapping("/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<TaskDTO> getTask(@PathVariable Long id) {
         TaskInterface task = taskService.getTaskById(id);
         if (task != null) {
-            return ResponseEntity.ok(convertToDTO(task)); // Convert TaskInterface to TaskDTO
+            return ResponseEntity.ok(modelMapper.map(task, TaskDTO.class));
         } else {
             return ResponseEntity.notFound().build();
         }
     }
 
-    // PUT request to update a task by ID
     @PutMapping("/update/{id}")
     public ResponseEntity<TaskDTO> updateTask(@PathVariable Long id, @RequestBody TaskDTO taskDTO) {
         TaskInterface updatedTask = taskService.updateTask(id, taskDTO);
         if (updatedTask != null) {
-            return ResponseEntity.ok(convertToDTO(updatedTask)); // Convert TaskInterface to TaskDTO
+            return ResponseEntity.ok(modelMapper.map(updatedTask, TaskDTO.class));
         } else {
             return ResponseEntity.notFound().build();
         }
     }
 
-    // POST request to create a new task
     @PostMapping("/create")
     public ResponseEntity<TaskDTO> createTask(@RequestBody TaskDTO taskDTO) {
         TaskInterface createdTask = taskService.createTask(taskDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(convertToDTO(createdTask)); // Convert TaskInterface to TaskDTO
+        return ResponseEntity.status(HttpStatus.CREATED).body(modelMapper.map(createdTask, TaskDTO.class));
     }
 
-    // DELETE request to delete a task by ID
-    @PostMapping("/delete/{task_Id}")
-    public ResponseEntity<String> deleteTask(@PathVariable Long task_Id) {
-        boolean deleted = taskService.deleteTask(task_Id);
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteTask(@PathVariable Long id) {
+        boolean deleted = taskService.deleteTask(id);
         if (deleted) {
             return ResponseEntity.ok("Task deleted successfully.");
         } else {
@@ -104,21 +109,9 @@ public class TaskController {
 
         List<TaskInterface> userTasks = taskService.getTasksByUsername(username);
         List<TaskDTO> taskDTOs = userTasks.stream()
-                .map(this::convertToDTO)
+                .map(task -> modelMapper.map(task, TaskDTO.class))
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(taskDTOs);
-    }
-
-    // Helper method to convert TaskInterface to TaskDTO
-    private TaskDTO convertToDTO(TaskInterface task) {
-        TaskDTO dto = new TaskDTO();
-        dto.setId(task.getTask_Id());
-        dto.setTaskTitle(task.getTask_Title());
-        dto.setDescription(task.getDescription());
-        dto.setAssignedTo(task.getAssigned_To());
-        dto.setStatus(task.getStatus());
-        dto.setDeadline(task.getDeadline());
-        return dto;
     }
 }
