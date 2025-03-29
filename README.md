@@ -1,9 +1,6 @@
  
 # Project B: Collaborative Task Management System by Chill Guys
 
-## update since milestone 2
-
-
 ## Project Status – Milestone 3
 
 This project is a collaborative task management system developed using Java Spring Boot (backend) and React.js (frontend). It enables users and administrators to manage tasks, assign roles, and interact through a secure platform.
@@ -18,9 +15,9 @@ This project is a collaborative task management system developed using Java Spri
 | **Secure Admin Login** |  Completed | JWT-based authentication system using Spring Security. |
 | **Role-Based Access Control** | Partially Completed | Roles and permissions are implemented in backend; admin role management UI is pending. |
 | **Task Locking** | Not Implemented | Lock mechanism for tasks is not yet added; planned for next milestone. |
-| **Task Search Functionality** | Partially Completed | Basic task retrieval implemented; advanced filtering (by date, user, status) is pending. |
+| **Task Search Functionality** |  Completed | Basic task retrieval implemented |
 | **Notification System** | Completed (Basic) | Backend logic for sending notifications on role/task updates is in place; frontend display to be integrated. |
-| **Unit Testing** | In Progress | Some tests planned; implementation pending with JUnit and Mockito. |
+| **Unit Testing** | Completed | Testing completed with JUnit and Mockito. |
 
 ## Overview
 The **Collaborative Task Management System** is designed to streamline team-based task assignments, project tracking, and user collaboration. It provides user authentication, role-based access control, and a structured workflow for managing tasks efficiently.
@@ -136,3 +133,63 @@ Avoids the creation of numerous subclasses for each combination of features.
 - **Security:** Configure JWT authentication and authorization (e.g., `SecurityConfig`, `JwtUtils`, `JwtAuthFilter`).
 - **DTOs:** Classes such as `TaskDTO`, `LoginRequest`, and `LoginResponse` for data transfer between layers.
 
+
+
+## Known Bugs and Issues
+
+* Misuse of wrapper Boolean and primitive type boolean
+
+    * Description of the bug:
+        * Incorrect usage of `Boolean` (wrapper class) and `boolean` (primitive type) in Java. This leads to unexpected behavior when handling null values in role filtering. The `Boolean` wrapper can represent null, while `boolean` converts null to false. This forces users to populate all filter fields, even when default values are not intended.
+    * Steps to reproduce the bug :
+        * 1. Attempt to filter roles using the API with some filter parameters set to null.
+        * 2. Observe that the filter returns incorrect results due to null values being treated as false, instead of null.
+        * 3. Observe that the api request requires all fields to be populated.
+    * Affected components or features:
+        * Role filtering API.
+        * Data handling in role search functionalities.
+    * Severity level: Moderate.
+
+* "Manage users" button in ViewTasks.tsx is non-functional.
+
+    * Description of the bug:
+        * The "Manage users" button located on the ViewTasks.tsx page does not perform any action when clicked. It is intended to navigate the user to the user management section.
+    * Steps to reproduce the bug:
+        * 1. Navigate to the ViewTasks.tsx page.
+        * 2. Locate the "Manage users" button.
+        * 3. Click the "Manage users" button.
+        * 4. Observe that no action is performed.
+    * Affected components or features:
+        * ViewTasks.tsx page.
+        * User management navigation.
+    * Severity level: Low.
+    * Solution:
+        * Import the `Link` component from `react-router-dom`.
+        * Use `component={Link}` as a prop in the MUI Button, specifying the desired route for user management.
+
+* Inconsistent UI Padding on Task Details Page.
+
+    * Description of the bug:
+        * The task details page exhibits inconsistent padding and spacing between elements, leading to a visually cluttered and unprofessional appearance. Specifically, the padding around the task description and assigned user sections varies significantly, making the page difficult to read.
+    * Steps to reproduce the bug:
+        * 1. Navigate to the task details page for any task.
+        * 2. Observe the spacing and padding around the task description, assigned users, and other elements.
+        * 3. Note the inconsistencies in padding values.
+    * Affected components or features:
+        * Task details page (ViewTaskDetails.tsx or similar).
+        * CSS styling.
+    * Severity level: Low.
+
+* JWT Token Stored in Local Storage.
+
+    * Description of the bug:
+        * The application stores the JSON Web Token (JWT) in local storage. This creates a security vulnerability, as local storage is accessible by JavaScript and susceptible to cross-site scripting (XSS) attacks. If an attacker injects malicious JavaScript, they can steal the JWT and gain unauthorized access to the user's account.
+    * Steps to reproduce the bug:
+        * 1. Log in to the application.
+        * 2. Open the browser's developer tools.
+        * 3. Navigate to the "Application" or "Storage" tab.
+        * 4. Observe the JWT stored in local storage.
+    * Affected components or features:
+        * Authentication system.
+        * Token storage mechanism.
+    * Severity level: Critical.
