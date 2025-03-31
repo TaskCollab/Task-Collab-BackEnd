@@ -13,7 +13,7 @@ public class RoleDTO implements RoleInterface {
     private Boolean deletePermission;
     private Boolean updatePermission;
     private String userName;
-    
+
     @Override
     public Boolean isCreatePermission() {
         return createPermission;

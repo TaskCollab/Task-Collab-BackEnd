@@ -18,6 +18,9 @@ public class UserControllerService {
     private final RoleRepository roleRepository;
 
     @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
     public UserControllerService(UserRepository userRepository, UserService userService, RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.userService = userService;
@@ -58,7 +61,22 @@ public Users updateUserRole(Long userId, String roleName) {
         Users user = optionalUser.get();
         Role role = optionalRole.get();
         user.setRole(role);
-        return userRepository.save(user);
+        Users updatedUser = userRepository.save(user);
+
+        // Create a notification for the user
+        try {
+            notificationService.createNotification(
+                updatedUser.getUsername(), // Use username
+                "Your role has been updated to: " + role.getRoleName(),
+                "Role Update",
+                "Role Updated"
+            );
+        } catch (IllegalArgumentException e) {
+            // Log the error or handle it as appropriate for your application
+            System.err.println("Error creating notification: " + e.getMessage());
+        }
+
+        return updatedUser;
     }
     return null; // or throw an exception indicating user or role not found
 }

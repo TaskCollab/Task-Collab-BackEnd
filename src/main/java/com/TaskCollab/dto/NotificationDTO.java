@@ -1,35 +1,15 @@
-package com.TaskCollab.Entity;
+package com.TaskCollab.dto;
 
-import jakarta.persistence.*;
-import lombok.Data;
-import java.time.LocalDateTime;
+import com.TaskCollab.Entity.NotificationInterface;
 
-@Entity
-@Data
-@Table(name = "Notification")
-public class Notification implements NotificationInterface {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "notification_id")
+public class NotificationDTO implements NotificationInterface{
+    private String username;
+    private Long userId;
     private Long notificationId;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private Users user;
-
-    @Column(name = "content", nullable = false)
     private String content;
-
-    @Column(name = "type", nullable = false, length = 50)
     private String type;
-
-    @Column(name = "read_status", nullable = false)
     private boolean readStatus;
-
-    @Column(name = "notification_title", nullable = false, length = 50)
     private String notificationTitle;
-
-    // Getters and Setters (Lombok @Data handles these)
 
     @Override
     public Long getNotificationId() {
@@ -83,24 +63,22 @@ public class Notification implements NotificationInterface {
 
     @Override
     public String getUserName() {
-        return this.user.getUsername();
+        return this.username;
     }
 
     @Override
     public void setUserName(String userName) {
-        this.user.setUsername(userName);
+        this.username = userName;
     }
 
     @Override
     public Long getUserID() {
-        return this.user.getUserId();
+        return this.userId;
     }
 
     @Override
-    public void setUserID(Long userId) {
-        if (this.user == null) {
-            this.user = new Users();
-        }
-        this.user.setUserId(userId);
+    public void setUserID(Long userID) {
+        this.userId = userID;
     }
+
 }

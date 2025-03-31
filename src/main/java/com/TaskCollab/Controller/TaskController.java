@@ -1,11 +1,10 @@
 package com.TaskCollab.Controller;
 
+import com.TaskCollab.dto.ActiveUserDTO;
 import com.TaskCollab.dto.TaskDTO;
-
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-
+import com.TaskCollab.dto.TaskStatisticsDTO;
 import com.TaskCollab.Entity.TaskInterface;
+import com.TaskCollab.Service.FetchDataService;
 import com.TaskCollab.Service.SearchService;
 import com.TaskCollab.Service.TaskService;
 import com.TaskCollab.config.JwtProperties;
@@ -16,7 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeMap; // Import TypeMap
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,18 +31,14 @@ public class TaskController {
     @Autowired
     private SearchService searchService;
 
-
     @Autowired
     private JwtProperties jwtProperties;
 
-    @Autowired ModelMapper modelMapper;
+    @Autowired 
+    private ModelMapper modelMapper;
 
-    // Configure ModelMapper for TaskInterface to TaskDTO mapping
-    // @Autowired
-    // public TaskController(ModelMapper modelMapper) {
-    //     this.modelMapper = modelMapper;
-    //     TypeMap<TaskInterface, TaskDTO> typeMap = modelMapper.createTypeMap(TaskInterface.class, TaskDTO.class);
-    // }
+    @Autowired
+    private FetchDataService fetchDataService;
 
     @PostMapping("/search")
     public ResponseEntity<List<TaskDTO>> searchTasks(@RequestBody TaskDTO searchCriteria) {
@@ -111,5 +108,29 @@ public class TaskController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(taskDTOs);
+    }
+
+    @GetMapping("/statistics")
+    public ResponseEntity<List<TaskStatisticsDTO>> getTaskStatistics() {
+        List<TaskStatisticsDTO> taskStatistics = fetchDataService.getTaskStatistics();
+        return ResponseEntity.ok(taskStatistics);
+    }
+
+    @GetMapping("/top5/{filterType}")
+    public ResponseEntity<List<ActiveUserDTO>> getTop5UserWithMostTask(@PathVariable String filterType){
+        List<ActiveUserDTO> activeUser = fetchDataService.getTop5UsersWithMostTasks(filterType); 
+        return ResponseEntity.ok(activeUser);
+    }
+
+    // Helper method to convert TaskInterface to TaskDTO
+    private TaskDTO convertToDTO(TaskInterface task) {
+        TaskDTO dto = new TaskDTO();
+        dto.setId(task.getTask_Id());
+        dto.setTaskTitle(task.getTask_Title());
+        dto.setDescription(task.getDescription());
+        dto.setAssignedTo(task.getAssigned_To());
+        dto.setStatus(task.getStatus());
+        dto.setDeadline(task.getDeadline());
+        return dto;
     }
 }

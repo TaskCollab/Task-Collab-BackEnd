@@ -78,12 +78,12 @@ CREATE TABLE Message (
 );
 
 CREATE TABLE Notification (
-   notificationId BIGINT NOT NULL PRIMARY KEY IDENTITY(1,1),
+   notification_id BIGINT NOT NULL PRIMARY KEY IDENTITY(100,1),
    user_Id BIGINT NOT NULL,
    content NVARCHAR(MAX) NOT NULL,
    type NVARCHAR(50) NOT NULL,
-   readStatus BIT NOT NULL DEFAULT 0,
-   notificationTitle NVARCHAR(50) NOT NULL,
+   read_status BIT NOT NULL DEFAULT 0,
+   notification_title NVARCHAR(50) NOT NULL,
    FOREIGN KEY (user_Id) REFERENCES Users(user_Id) ON DELETE CASCADE
 );
 
@@ -139,7 +139,7 @@ INSERT INTO Message (conversationId, user_Id, content, sendAt) VALUES
 (202, 103, 'Feature update is done, please review.', '2025-02-11 09:21:00');
 
 -- Insert notifications
-INSERT INTO Notification (user_Id, content, type, readStatus, notificationTitle) VALUES
+INSERT INTO Notification (user_Id, content, type, read_status, notification_title) VALUES
 (101, 'New task assigned: Fix Server Issues', 'Task', 0, 'New Task'),
 (102, 'Your task deadline is approaching', 'Reminder', 0, 'Task Reminder'),
 (103, 'Manager left a comment on your work', 'Comment', 1, 'Comment Received');

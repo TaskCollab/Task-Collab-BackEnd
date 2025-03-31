@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
+import jakarta.persistence.Tuple;
 
 import com.TaskCollab.Decorator.LoggingRoleDecorator;
 import com.TaskCollab.Decorator.ValidationRoleDecorator;
@@ -13,16 +14,20 @@ import com.TaskCollab.Entity.RoleInterface;
 import com.TaskCollab.Entity.Users;
 import com.TaskCollab.dao.RoleRepository;
 import com.TaskCollab.dto.RoleDTO;
+import com.TaskCollab.dto.TopUsersDTO;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
@@ -55,6 +60,7 @@ public class RoleService {
 
         return mapToRoleDTOs(results);
     }
+
     // Method 2: createUserJoin method
     private Join<Role, Users> createUserJoin(Root<Role> role, String userName) {
         return (userName != null && !userName.trim().isEmpty()) 
@@ -99,7 +105,7 @@ public class RoleService {
         return entityManager.createQuery(cq).getResultList();
     }
 
-    // Method 5: mapToRoleDTOs method
+    // Method 5: mapToRoleDTOs method (Remove the duplicate definition below this)
     private List<RoleDTO> mapToRoleDTOs(List<Object[]> results) {
         return results.stream().map(result -> {
             RoleDTO dto = new RoleDTO();
@@ -113,16 +119,15 @@ public class RoleService {
             return dto;
         }).collect(Collectors.toList());
     }
-    //[Code smell No.2] Long createRole method. Need to extract into smaller methods
-
-    // Method 1: createRole method
+    
+    // Method 6: createRole method
     public RoleInterface createRole(RoleDTO roleDTO) {
         Role role = convertToRoleEntity(roleDTO);
         Role savedRole = saveRole(role);
         return applyDecorators(savedRole);
     }
 
-    // Method 2: convertToRoleEntity method
+    // Method 7: convertToRoleEntity method
     private Role convertToRoleEntity(RoleDTO roleDTO) {
         Role role = new Role();
         role.setRoleName(roleDTO.getRoleName());
@@ -133,12 +138,12 @@ public class RoleService {
         return role;
     }
 
-    // Method 3: saveRole method
+    // Method 8: saveRole method
     private Role saveRole(Role role) {
         return roleRepository.save(role);
     }
 
-    // Method 4: applyDecorators method
+    // Method 9: applyDecorators method
     private RoleInterface applyDecorators(Role role) {
         RoleInterface decoratedRole = (RoleInterface) role;
         decoratedRole = new LoggingRoleDecorator(decoratedRole);
@@ -156,5 +161,5 @@ public class RoleService {
         }
         System.out.println("Role with name " + roleName + " not found");
         return false;
-    }
+    }      
 }
