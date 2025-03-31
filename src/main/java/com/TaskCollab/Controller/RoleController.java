@@ -1,8 +1,12 @@
 package com.TaskCollab.Controller;
 
 import com.TaskCollab.dto.RoleDTO;
+import com.TaskCollab.dto.RoleStatisticsDTO;
+import com.TaskCollab.dto.TopUsersDTO;
 import com.TaskCollab.Entity.RoleInterface;
+import com.TaskCollab.Service.FetchDataService;
 import com.TaskCollab.Service.RoleService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +21,9 @@ public class RoleController {
     
     @Autowired
     private RoleService roleService;
+
+    @Autowired
+    private FetchDataService fetchDataService;
 
 
     @PostMapping("/search")
@@ -55,6 +62,31 @@ public class RoleController {
         }
     }
 
+    /*[DATA VISUALIZATION]: Return Top 5 user with the most roles in a selected permission type.
+       Visualization: A table with columns: Username, CreatePermission, ReadPermission, DeletePermission, UpdatePermission
+                    User can click on which criteria to sort in descending order top 5.
+       Suggestion:
+        [] Add Filter: 5 categories (create, delete, update, read, total).
+        [] Use Color-Coding: Highlighting the user with the highest count in each category can make it more visually intuitive.
+        [] Drill-down Feature: Clicking on a username could open a detailed view showing all roles assigned to that user.
+    */
+    @GetMapping("/top5/{permissionType}")
+    public ResponseEntity<List<TopUsersDTO>> getTop5UsersWithMostRoles(@PathVariable String permissionType) {
+        List<TopUsersDTO> topUsers = fetchDataService.getTop5UsersWithPermissionCounts(permissionType);
+        return ResponseEntity.ok(topUsers);
+    }
+
+    /*[DATA VISUALIZATION]: Return the total Roles in certain types and percentage.
+       Suggestion:
+        [] Create pie chart: Show visually visually the distribution of the Roles.
+        [] Icons indicates the permission type: to show the total role of each type.
+    */
+    @GetMapping("/statistics")
+    public ResponseEntity<List<RoleStatisticsDTO>> getRoleStatistics(){
+        List<RoleStatisticsDTO> roleStatistics = fetchDataService.getRoleStatistics();
+        return ResponseEntity.ok(roleStatistics);
+    }
+
     // Helper method to convert RoleInterface to RoleDTO
     private RoleDTO convertToDTO(RoleInterface role) {
         RoleDTO dto = new RoleDTO();
@@ -67,5 +99,7 @@ public class RoleController {
         dto.setUserName(role.getUserName());
         return dto;
     }
+
+    
 
 }

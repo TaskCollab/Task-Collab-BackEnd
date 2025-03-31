@@ -3,6 +3,8 @@ package com.TaskCollab.Service;
 import com.TaskCollab.Decorator.LoggingTaskDecorator;
 import com.TaskCollab.Decorator.ValidationTaskDecorator;
 import com.TaskCollab.dto.TaskDTO;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import com.TaskCollab.Entity.Task;
 import com.TaskCollab.Entity.TaskInterface;
 import com.TaskCollab.Entity.Users;
@@ -11,6 +13,11 @@ import com.TaskCollab.dao.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+<<<<<<< Updated upstream
+=======
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+>>>>>>> Stashed changes
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,7 +32,14 @@ public class TaskService {
     private TaskRepository taskRepository;
 
     @Autowired
+<<<<<<< Updated upstream
     private UserRepository userRepository;
+=======
+    private NotificationService notificationService;
+
+    @PersistenceContext
+    private EntityManager entityManager;  // Inject EntityManager
+>>>>>>> Stashed changes
 
     // Retrieve a specific task by its ID
     public TaskInterface getTaskById(Long taskId) {
@@ -49,10 +63,16 @@ public class TaskService {
 
         Task savedTask = taskRepository.save(task);
 
+        // Try to call the createNotification for calling the new notification.
+        // It seems like Criteria API does not support for INSERT commands.
+        //notificationService.createNotification(savedTask, "New Task" + savedTask.getTask_Id(), "Task");        
+
         TaskInterface decoratedTask = savedTask;
         decoratedTask = new LoggingTaskDecorator(decoratedTask);
         decoratedTask = new ValidationTaskDecorator(decoratedTask);
+
         return decoratedTask;
+
     }
 
     // Update existing task by ID
@@ -68,6 +88,7 @@ public class TaskService {
 
             Task updatedTask = taskRepository.save(existingTask);
 
+<<<<<<< Updated upstream
             // Lookup user by username to get userId for notification
             Users user = userRepository.findByUsername(updatedTask.getAssigned_To()).orElse(null);
             if (user != null) {
@@ -78,12 +99,15 @@ public class TaskService {
             }
 
             // Decorate the task
+=======
+>>>>>>> Stashed changes
             TaskInterface decoratedTask = updatedTask;
             decoratedTask = new LoggingTaskDecorator(decoratedTask);
             decoratedTask = new ValidationTaskDecorator(decoratedTask);
 
             return decoratedTask;
         }).orElse(null);
+        // Call to create the notification to update (right here).
     }
 
     // Delete task by ID
@@ -94,6 +118,7 @@ public class TaskService {
             return true;
         }
         System.out.println("Task ID " + task_Id + " not found.");
+        // Call to create the notification to update (right here).
         return false;
     }
 
