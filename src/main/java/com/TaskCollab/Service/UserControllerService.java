@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.TaskCollab.Entity.Users;
 import com.TaskCollab.Entity.Role;
+import com.TaskCollab.dao.RoleRepository;
 import com.TaskCollab.dao.UserRepository;
 
 import java.util.List;
@@ -14,11 +15,13 @@ public class UserControllerService {
 
     private final UserRepository userRepository;
     private final UserService userService;
+    private final RoleRepository roleRepository;
 
     @Autowired
-    public UserControllerService(UserRepository userRepository, UserService userService) {
+    public UserControllerService(UserRepository userRepository, UserService userService, RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.userService = userService;
+        this.roleRepository = roleRepository;
     }
 
     // Get user by ID
@@ -46,16 +49,17 @@ public class UserControllerService {
         return userService.deleteUser(id);
     }
 
-    // Assign Role to a user
-    public Users updateUserRole(Long userId, Role newRole) {
-        Optional<Users> optionalUser = userRepository.findById(userId);
-        Optional<Role> optionalRole = Optional.ofNullable(newRole);
+// Assign Role to a user by Role ID
+public Users updateUserRole(Long userId, String roleName) {
+    Optional<Users> optionalUser = userRepository.findById(userId);
+    Optional<Role> optionalRole = roleRepository.findByRoleName(roleName);
 
-        if (optionalUser.isPresent() && optionalRole.isPresent()) {
-            Users user = optionalUser.get();
-            user.setRole(optionalRole.get());
-            return userRepository.save(user);
-        }
-        return null;
+    if (optionalUser.isPresent() && optionalRole.isPresent()) {
+        Users user = optionalUser.get();
+        Role role = optionalRole.get();
+        user.setRole(role);
+        return userRepository.save(user);
     }
+    return null; // or throw an exception indicating user or role not found
+}
 }
