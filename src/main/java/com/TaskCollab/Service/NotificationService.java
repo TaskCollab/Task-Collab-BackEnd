@@ -8,15 +8,27 @@ import java.time.LocalDateTime;
 
 @Service
 public class NotificationService {
+    
+    private final NotificationRepository notificationRepository;
+
     @Autowired
-    private NotificationRepository notificationRepository;
+
+    public NotificationService(NotificationRepository notificationRepository) {
+        this.notificationRepository = notificationRepository;
+    }
+
 
     public void sendNotification(Long userId, String message) {
+        Notification notification = buildNotification(userId, message);
+        notificationRepository.save(notification);
+    }
+
+    private Notification buildNotification(Long userId, String message) {
         Notification notification = new Notification();
         notification.setUserId(userId);
         notification.setMessage(message);
         notification.setRead(false);
         notification.setTimestamp(LocalDateTime.now());
-        notificationRepository.save(notification);
+        return notification;
     }
 }
