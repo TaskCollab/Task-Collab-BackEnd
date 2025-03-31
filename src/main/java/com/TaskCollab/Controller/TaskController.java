@@ -121,6 +121,49 @@ public class TaskController {
         List<ActiveUserDTO> activeUser = fetchDataService.getTop5UsersWithMostTasks(filterType); 
         return ResponseEntity.ok(activeUser);
     }
+    @PutMapping("/lock/{id}")
+public ResponseEntity<String> toggleLockStatus(
+        @PathVariable Long id,
+        @RequestParam boolean lock,
+        HttpServletRequest request) {
+    try {
+        // Extract username from JWT token
+        String token = request.getHeader("Authorization").substring(7);
+        String secret = jwtProperties.getSecret();
+        String username = Jwts.parserBuilder()
+                .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes()))
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+
+        // Check if user has ADMIN role (from authorities claim)
+        List<String> roles = (List<String>) Jwts.parserBuilder()
+                .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes()))
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("roles", List.class);
+
+        if (!roles.contains("ROLE_ADMIN")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only admins can lock or unlock tasks.");
+        }
+
+        TaskInterface task = taskService.getTaskById(id);
+        if (task == null) return ResponseEntity.notFound().build();
+
+        TaskDTO dto = convertToDTO(task);
+        dto.setLocked(lock);
+        taskService.updateTask(id, dto);
+
+        return ResponseEntity.ok("Task has been " + (lock ? "locked" : "unlocked") + " successfully.");
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token.");
+    }
+}
+
+
+
 
     // Helper method to convert TaskInterface to TaskDTO
     private TaskDTO convertToDTO(TaskInterface task) {

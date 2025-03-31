@@ -5,10 +5,11 @@ import com.TaskCollab.Decorator.ValidationTaskDecorator;
 import com.TaskCollab.dto.TaskDTO;
 import com.TaskCollab.Entity.Task;
 import com.TaskCollab.Entity.TaskInterface;
-import com.TaskCollab.Entity.Users;
 import com.TaskCollab.dao.TaskRepository;
 import com.TaskCollab.dao.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -46,10 +47,15 @@ public class TaskService {
         task.setAssigned_To(taskDTO.getAssignedTo());
         task.setStatus(taskDTO.getStatus());
         task.setDeadline(taskDTO.getDeadline());
+        task.setLocked(false); // default: unlocked
 
         Task savedTask = taskRepository.save(task);
 
-        notificationService.createNotification(taskDTO.getAssignedTo(), "A new task was created with title - "  + taskDTO.getTaskTitle(), "Information", "New Ticket was created for you");
+        notificationService.createNotification(
+                taskDTO.getAssignedTo(),
+                "A new task was created with title - " + taskDTO.getTaskTitle(),
+                "Information",
+                "New Ticket was created for you");
 
         TaskInterface decoratedTask = savedTask;
         decoratedTask = new LoggingTaskDecorator(decoratedTask);
@@ -58,69 +64,71 @@ public class TaskService {
         return decoratedTask;
     }
 
-// Update existing task by ID
-public TaskInterface updateTask(Long taskId, TaskDTO taskDTO) {
-    Optional<Task> existingTaskOpt = taskRepository.findById(taskId);
+    // Update existing task by ID
+    public TaskInterface updateTask(Long taskId, TaskDTO taskDTO) {
+        Optional<Task> existingTaskOpt = taskRepository.findById(taskId);
 
-    return existingTaskOpt.map(existingTask -> {
-        existingTask.setTask_Title(taskDTO.getTaskTitle());
-        existingTask.setDescription(taskDTO.getDescription());
-        existingTask.setAssigned_To(taskDTO.getAssignedTo());
-        existingTask.setStatus(taskDTO.getStatus());
-        existingTask.setDeadline(taskDTO.getDeadline());
+        return existingTaskOpt.map(existingTask -> {
 
-        Task updatedTask = taskRepository.save(existingTask);
+            // Block if task is locked and user is not an admin
+            if (existingTask.isLocked() && !isAdmin()) {
+                throw new RuntimeException("Task is locked and cannot be updated.");
+            }
 
-        // Create a notification for the assigned user
-        try {
-            notificationService.createNotification(
-                updatedTask.getAssigned_To(), // Use username
-                "Task '" + updatedTask.getTask_Title() + "' has been updated.",
-                "Task Update",
-                "Task Updated"
-            );
-        } catch (IllegalArgumentException e) {
-            // Log the error or handle it as appropriate for your application
-            System.err.println("Error creating notification: " + e.getMessage());
-        }
+            existingTask.setTask_Title(taskDTO.getTaskTitle());
+            existingTask.setDescription(taskDTO.getDescription());
+            existingTask.setAssigned_To(taskDTO.getAssignedTo());
+            existingTask.setStatus(taskDTO.getStatus());
+            existingTask.setDeadline(taskDTO.getDeadline());
+            existingTask.setLocked(taskDTO.isLocked()); // Admin can lock/unlock
 
-        TaskInterface decoratedTask = updatedTask;
-        decoratedTask = new LoggingTaskDecorator(decoratedTask);
-        decoratedTask = new ValidationTaskDecorator(decoratedTask);
+            Task updatedTask = taskRepository.save(existingTask);
 
-        return decoratedTask;
-    }).orElse(null);
-}
+            try {
+                notificationService.createNotification(
+                        updatedTask.getAssigned_To(),
+                        "Task '" + updatedTask.getTask_Title() + "' has been updated.",
+                        "Task Update",
+                        "Task Updated");
+            } catch (IllegalArgumentException e) {
+                System.err.println("Error creating notification: " + e.getMessage());
+            }
 
-// Delete task by ID
-public boolean deleteTask(Long task_Id) {
-    Optional<Task> taskOpt = taskRepository.findById(task_Id);
+            TaskInterface decoratedTask = updatedTask;
+            decoratedTask = new LoggingTaskDecorator(decoratedTask);
+            decoratedTask = new ValidationTaskDecorator(decoratedTask);
 
-    if (taskOpt.isPresent()) {
-        Task taskToDelete = taskOpt.get(); // Get the Task object
-        taskRepository.deleteById(task_Id);
-        System.out.println("Deleted Task with ID: " + task_Id);
-
-        // Create a notification for the assigned user
-        try {
-            notificationService.createNotification(
-                taskToDelete.getAssigned_To(), // Use username
-                "Task '" + taskToDelete.getTask_Title() + "' has been deleted.",
-                "Task Deletion",
-                "Task Deleted"
-            );
-        } catch (IllegalArgumentException e) {
-            // Log the error or handle it as appropriate for your application
-            System.err.println("Error creating notification: " + e.getMessage());
-        }
-
-        return true;
+            return decoratedTask;
+        }).orElse(null);
     }
 
-    System.out.println("Task ID " + task_Id + " not found.");
-    return false;
-}
+    // Delete task by ID
+    public boolean deleteTask(Long taskId) {
+        Optional<Task> taskOpt = taskRepository.findById(taskId);
 
+        if (taskOpt.isPresent()) {
+            Task taskToDelete = taskOpt.get();
+            taskRepository.deleteById(taskId);
+            System.out.println("Deleted Task with ID: " + taskId);
+
+            try {
+                notificationService.createNotification(
+                        taskToDelete.getAssigned_To(),
+                        "Task '" + taskToDelete.getTask_Title() + "' has been deleted.",
+                        "Task Deletion",
+                        "Task Deleted");
+            } catch (IllegalArgumentException e) {
+                System.err.println("Error creating notification: " + e.getMessage());
+            }
+
+            return true;
+        }
+
+        System.out.println("Task ID " + taskId + " not found.");
+        return false;
+    }
+
+    // Get tasks assigned to a specific user
     public List<TaskInterface> getTasksByUsername(String username) {
         List<Task> tasks = taskRepository.findByAssigned_To(username);
         return tasks.stream().map(task -> {
@@ -129,5 +137,15 @@ public boolean deleteTask(Long task_Id) {
             decoratedTask = new ValidationTaskDecorator(decoratedTask);
             return decoratedTask;
         }).collect(Collectors.toList());
+    }
+
+    // helper method to check if current user is admin
+    private boolean isAdmin() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetails userDetails) {
+            return userDetails.getAuthorities().stream()
+                    .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+        }
+        return false;
     }
 }

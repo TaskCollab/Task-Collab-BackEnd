@@ -30,6 +30,8 @@ public class Task implements TaskInterface {
     private String assigned_To;
     private String status;
     private LocalDateTime deadline;
+    @Column(nullable = false)
+    private boolean locked = false;
 
 
     public String getTask_Title() {
@@ -70,5 +72,12 @@ public class Task implements TaskInterface {
 
     public void setDeadline(LocalDateTime deadline) {
         this.deadline = deadline;
+    }
+    public boolean isLocked() {
+        return locked;
+    }
+    
+    public void setLocked(boolean locked) {
+        this.locked = locked;
     }
 }
