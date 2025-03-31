@@ -49,6 +49,8 @@ public class TaskService {
 
         Task savedTask = taskRepository.save(task);
 
+        notificationService.createNotification(taskDTO.getAssignedTo(), "A new task was created with title - "  + taskDTO.getTaskTitle(), "Information", "New Ticket was created for you");
+
         TaskInterface decoratedTask = savedTask;
         decoratedTask = new LoggingTaskDecorator(decoratedTask);
         decoratedTask = new ValidationTaskDecorator(decoratedTask);
@@ -56,48 +58,68 @@ public class TaskService {
         return decoratedTask;
     }
 
-    // Update existing task by ID
-    public TaskInterface updateTask(Long taskId, TaskDTO taskDTO) {
-        Optional<Task> existingTaskOpt = taskRepository.findById(taskId);
+// Update existing task by ID
+public TaskInterface updateTask(Long taskId, TaskDTO taskDTO) {
+    Optional<Task> existingTaskOpt = taskRepository.findById(taskId);
 
-        return existingTaskOpt.map(existingTask -> {
-            existingTask.setTask_Title(taskDTO.getTaskTitle());
-            existingTask.setDescription(taskDTO.getDescription());
-            existingTask.setAssigned_To(taskDTO.getAssignedTo());
-            existingTask.setStatus(taskDTO.getStatus());
-            existingTask.setDeadline(taskDTO.getDeadline());
+    return existingTaskOpt.map(existingTask -> {
+        existingTask.setTask_Title(taskDTO.getTaskTitle());
+        existingTask.setDescription(taskDTO.getDescription());
+        existingTask.setAssigned_To(taskDTO.getAssignedTo());
+        existingTask.setStatus(taskDTO.getStatus());
+        existingTask.setDeadline(taskDTO.getDeadline());
 
-            Task updatedTask = taskRepository.save(existingTask);
+        Task updatedTask = taskRepository.save(existingTask);
 
-            // Lookup user by username to get userId for notification
-            Users user = userRepository.findByUsername(updatedTask.getAssigned_To()).orElse(null);
-            if (user != null) {
-                notificationService.createNotification(
-                    user.getUserId(),
-                    "Task '" + updatedTask.getTask_Title() + "' has been updated.",
-                    "Task Update",
-                    "Task Updated"
-                );
-            }
-
-            TaskInterface decoratedTask = updatedTask;
-            decoratedTask = new LoggingTaskDecorator(decoratedTask);
-            decoratedTask = new ValidationTaskDecorator(decoratedTask);
-
-            return decoratedTask;
-        }).orElse(null);
-    }
-
-    // Delete task by ID
-    public boolean deleteTask(Long task_Id) {
-        if (taskRepository.findById(task_Id).isPresent()) {
-            taskRepository.deleteById(task_Id);
-            System.out.println("Deleted Task with ID: " + task_Id);
-            return true;
+        // Create a notification for the assigned user
+        try {
+            notificationService.createNotification(
+                updatedTask.getAssigned_To(), // Use username
+                "Task '" + updatedTask.getTask_Title() + "' has been updated.",
+                "Task Update",
+                "Task Updated"
+            );
+        } catch (IllegalArgumentException e) {
+            // Log the error or handle it as appropriate for your application
+            System.err.println("Error creating notification: " + e.getMessage());
         }
-        System.out.println("Task ID " + task_Id + " not found.");
-        return false;
+
+        TaskInterface decoratedTask = updatedTask;
+        decoratedTask = new LoggingTaskDecorator(decoratedTask);
+        decoratedTask = new ValidationTaskDecorator(decoratedTask);
+
+        return decoratedTask;
+    }).orElse(null);
+}
+
+// Delete task by ID
+public boolean deleteTask(Long task_Id) {
+    Optional<Task> taskOpt = taskRepository.findById(task_Id);
+
+    if (taskOpt.isPresent()) {
+        Task taskToDelete = taskOpt.get(); // Get the Task object
+        taskRepository.deleteById(task_Id);
+        System.out.println("Deleted Task with ID: " + task_Id);
+
+        // Create a notification for the assigned user
+        try {
+            notificationService.createNotification(
+                taskToDelete.getAssigned_To(), // Use username
+                "Task '" + taskToDelete.getTask_Title() + "' has been deleted.",
+                "Task Deletion",
+                "Task Deleted"
+            );
+        } catch (IllegalArgumentException e) {
+            // Log the error or handle it as appropriate for your application
+            System.err.println("Error creating notification: " + e.getMessage());
+        }
+
+        return true;
     }
+
+    System.out.println("Task ID " + task_Id + " not found.");
+    return false;
+}
 
     public List<TaskInterface> getTasksByUsername(String username) {
         List<Task> tasks = taskRepository.findByAssigned_To(username);

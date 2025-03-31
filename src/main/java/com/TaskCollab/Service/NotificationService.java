@@ -85,21 +85,27 @@ public class NotificationService {
     }
 
     @Transactional
-    public void createNotification(Long userId, String content, String type, String notificationTitle) {
-        Users user = entityManager.find(Users.class, userId);
-
+    public void createNotification(String username, String content, String type, String notificationTitle) {
+        Users user = entityManager.createQuery(
+                "SELECT u FROM Users u WHERE u.username = :username", Users.class)
+            .setParameter("username", username)
+            .getResultList()
+            .stream()
+            .findFirst()
+            .orElse(null);
+    
         if (user == null) {
             // Handle user not found (e.g., throw an exception, log an error)
-            throw new IllegalArgumentException("User with ID " + userId + " not found.");
+            throw new IllegalArgumentException("User with username " + username + " not found.");
         }
-
+    
         Notification notification = new Notification();
         notification.setUser(user);
         notification.setContent(content);
         notification.setType(type);
         notification.setReadStatus(false);
         notification.setNotificationTitle(notificationTitle);
-
+    
         entityManager.persist(notification);
     }
 }

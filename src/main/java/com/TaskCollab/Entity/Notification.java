@@ -29,9 +29,6 @@ public class Notification implements NotificationInterface {
     @Column(name = "notification_title", nullable = false, length = 50)
     private String notificationTitle;
 
-    @Column(name = "timestamp")
-    private LocalDateTime timestamp;
-
     // Getters and Setters (Lombok @Data handles these)
 
     @Override
