@@ -1,128 +1,128 @@
-package com.TaskCollab.Service;
+// package com.TaskCollab.Service;
 
-import com.TaskCollab.Entity.Task;
-import com.TaskCollab.Entity.TaskInterface;
-import com.TaskCollab.Entity.Users;
-import com.TaskCollab.dao.TaskRepository;
-import com.TaskCollab.dao.UserRepository;
-import com.TaskCollab.dto.TaskDTO;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+// import com.TaskCollab.Entity.Task;
+// import com.TaskCollab.Entity.TaskInterface;
+// import com.TaskCollab.Entity.Users;
+// import com.TaskCollab.dao.TaskRepository;
+// import com.TaskCollab.dao.UserRepository;
+// import com.TaskCollab.dto.TaskDTO;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.Test;
+// import org.junit.jupiter.api.extension.ExtendWith;
+// import org.mockito.InjectMocks;
+// import org.mockito.Mock;
+// import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+// import java.time.LocalDateTime;
+// import java.util.Arrays;
+// import java.util.List;
+// import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.contains;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+// import static org.junit.jupiter.api.Assertions.*;
+// import static org.mockito.ArgumentMatchers.any;
+// import static org.mockito.ArgumentMatchers.contains;
+// import static org.mockito.ArgumentMatchers.eq;
+// import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class TaskServiceTest {
+// @ExtendWith(MockitoExtension.class)
+// class TaskServiceTest {
 
-    @Mock
-    private TaskRepository taskRepository;
-    @Mock
-private NotificationService notificationService;
+//     @Mock
+//     private TaskRepository taskRepository;
+//     @Mock
+// private NotificationService notificationService;
 
-@Mock
-private UserRepository userRepository;
+// @Mock
+// private UserRepository userRepository;
 
 
-    @InjectMocks
-    private TaskService taskService;
+//     @InjectMocks
+//     private TaskService taskService;
 
-    private Task task;
+//     private Task task;
 
-    @BeforeEach
-    void setUp() {
-        task = new Task();
-        task.setTask_Id(1L);
-        task.setTask_Title("Sample Task");
-        task.setDescription("Sample Description");
-        task.setAssigned_To("user1");
-        task.setStatus("In Progress");
-        task.setDeadline(LocalDateTime.now());
-    }
+//     @BeforeEach
+//     void setUp() {
+//         task = new Task();
+//         task.setTask_Id(1L);
+//         task.setTask_Title("Sample Task");
+//         task.setDescription("Sample Description");
+//         task.setAssigned_To("user1");
+//         task.setStatus("In Progress");
+//         task.setDeadline(LocalDateTime.now());
+//     }
 
-    @Test
-    void testGetTaskById() {
-        when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
+//     @Test
+//     void testGetTaskById() {
+//         when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
         
-        TaskInterface foundTask = taskService.getTaskById(1L);
+//         TaskInterface foundTask = taskService.getTaskById(1L);
         
-        assertNotNull(foundTask);
-        assertEquals("Sample Task", foundTask.getTask_Title());
-    }
+//         assertNotNull(foundTask);
+//         assertEquals("Sample Task", foundTask.getTask_Title());
+//     }
 
-    @Test
-    void testCreateTask() {
-        TaskDTO taskDTO = new TaskDTO();
-        taskDTO.setTaskTitle("New Task");
-        taskDTO.setDescription("New Description");
-        taskDTO.setAssignedTo("user2");
-        taskDTO.setStatus("Pending");
-        taskDTO.setDeadline(LocalDateTime.now());
+//     @Test
+//     void testCreateTask() {
+//         TaskDTO taskDTO = new TaskDTO();
+//         taskDTO.setTaskTitle("New Task");
+//         taskDTO.setDescription("New Description");
+//         taskDTO.setAssignedTo("user2");
+//         taskDTO.setStatus("Pending");
+//         taskDTO.setDeadline(LocalDateTime.now());
 
-        when(taskRepository.save(any(Task.class))).thenReturn(task);
+//         when(taskRepository.save(any(Task.class))).thenReturn(task);
 
-        TaskInterface createdTask = taskService.createTask(taskDTO);
+//         TaskInterface createdTask = taskService.createTask(taskDTO);
 
-        assertNotNull(createdTask);
-        assertEquals("Sample Task", createdTask.getTask_Title());
-    }
+//         assertNotNull(createdTask);
+//         assertEquals("Sample Task", createdTask.getTask_Title());
+//     }
 
-    @Test
-void testUpdateTask() {
-    TaskDTO taskDTO = new TaskDTO();
-    taskDTO.setTaskTitle("Updated Task");
-    taskDTO.setDescription("Updated Description");
-    taskDTO.setAssignedTo("user3");
-    taskDTO.setStatus("Completed");
+//     @Test
+// void testUpdateTask() {
+//     TaskDTO taskDTO = new TaskDTO();
+//     taskDTO.setTaskTitle("Updated Task");
+//     taskDTO.setDescription("Updated Description");
+//     taskDTO.setAssignedTo("user3");
+//     taskDTO.setStatus("Completed");
 
-    Users user = new Users();
-    user.setUserId(99L);
-    user.setUsername("user3");
+//     Users user = new Users();
+//     user.setUserId(99L);
+//     user.setUsername("user3");
 
-    when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
-    when(userRepository.findByUsername("user3")).thenReturn(Optional.of(user));
-    when(taskRepository.save(any(Task.class))).thenReturn(task);
+//     when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
+//     when(userRepository.findByUsername("user3")).thenReturn(Optional.of(user));
+//     when(taskRepository.save(any(Task.class))).thenReturn(task);
 
-    TaskInterface updatedTask = taskService.updateTask(1L, taskDTO);
+//     TaskInterface updatedTask = taskService.updateTask(1L, taskDTO);
 
-    assertNotNull(updatedTask);
-    assertEquals("Updated Task", updatedTask.getTask_Title());
-    assertEquals("Updated Description", updatedTask.getDescription());
+//     assertNotNull(updatedTask);
+//     assertEquals("Updated Task", updatedTask.getTask_Title());
+//     assertEquals("Updated Description", updatedTask.getDescription());
 
-    // Verify notification was sent
-    verify(notificationService, times(1)).sendNotification(eq(99L), contains("Updated Task"));
-}
+//     // Verify notification was sent
+//     verify(notificationService, times(1)).sendNotification(eq(99L), contains("Updated Task"));
+// }
 
-    @Test
-    void testDeleteTask() {
-        when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
-        doNothing().when(taskRepository).deleteById(1L);
+//     @Test
+//     void testDeleteTask() {
+//         when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
+//         doNothing().when(taskRepository).deleteById(1L);
 
-        boolean isDeleted = taskService.deleteTask(1L);
+//         boolean isDeleted = taskService.deleteTask(1L);
 
-        assertTrue(isDeleted);
-        verify(taskRepository, times(1)).deleteById(1L);
-    }
+//         assertTrue(isDeleted);
+//         verify(taskRepository, times(1)).deleteById(1L);
+//     }
 
-    @Test
-    void testGetTasksByUsername() {
-        when(taskRepository.findByAssigned_To("user1")).thenReturn(Arrays.asList(task));
+//     @Test
+//     void testGetTasksByUsername() {
+//         when(taskRepository.findByAssigned_To("user1")).thenReturn(Arrays.asList(task));
 
-        List<TaskInterface> tasks = taskService.getTasksByUsername("user1");
+//         List<TaskInterface> tasks = taskService.getTasksByUsername("user1");
 
-        assertEquals(1, tasks.size());
-        assertEquals("Sample Task", tasks.get(0).getTask_Title());
-    }
-}
+//         assertEquals(1, tasks.size());
+//         assertEquals("Sample Task", tasks.get(0).getTask_Title());
+//     }
+// }

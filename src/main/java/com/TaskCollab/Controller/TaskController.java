@@ -2,14 +2,7 @@ package com.TaskCollab.Controller;
 
 import com.TaskCollab.dto.ActiveUserDTO;
 import com.TaskCollab.dto.TaskDTO;
-<<<<<<< Updated upstream
-
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-
-=======
 import com.TaskCollab.dto.TaskStatisticsDTO;
->>>>>>> Stashed changes
 import com.TaskCollab.Entity.TaskInterface;
 import com.TaskCollab.Service.FetchDataService;
 import com.TaskCollab.Service.SearchService;
@@ -20,13 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-<<<<<<< Updated upstream
 import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeMap; // Import TypeMap
-=======
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 
->>>>>>> Stashed changes
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,19 +31,14 @@ public class TaskController {
     @Autowired
     private SearchService searchService;
 
-
     @Autowired
     private JwtProperties jwtProperties;
 
-<<<<<<< Updated upstream
-    @Autowired ModelMapper modelMapper;
+    @Autowired 
+    private ModelMapper modelMapper;
 
-    // Configure ModelMapper for TaskInterface to TaskDTO mapping
-    // @Autowired
-    // public TaskController(ModelMapper modelMapper) {
-    //     this.modelMapper = modelMapper;
-    //     TypeMap<TaskInterface, TaskDTO> typeMap = modelMapper.createTypeMap(TaskInterface.class, TaskDTO.class);
-    // }
+    @Autowired
+    private FetchDataService fetchDataService;
 
     @PostMapping("/search")
     public ResponseEntity<List<TaskDTO>> searchTasks(@RequestBody TaskDTO searchCriteria) {
@@ -65,18 +51,6 @@ public class TaskController {
         ).stream()
          .map(task -> modelMapper.map(task, TaskDTO.class))
          .collect(Collectors.toList());
-=======
-    @Autowired
-    private FetchDataService fetchDataService; // Injecting the service correctly   
-
-    @PostMapping("/search") // Change to POST to accept JSON body
-    public ResponseEntity<List<TaskDTO>> searchTasks(@RequestBody TaskDTO searchCriteria) { // Accept JSON body
-        String taskTitle = searchCriteria.getTaskTitle();
-        String description = searchCriteria.getDescription();
-        String assignedTo = searchCriteria.getAssignedTo();
-        String status = searchCriteria.getStatus();
-        String deadline = null;
->>>>>>> Stashed changes
 
         return ResponseEntity.ok(tasks);
     }
@@ -135,33 +109,19 @@ public class TaskController {
 
         return ResponseEntity.ok(taskDTOs);
     }
-<<<<<<< Updated upstream
-=======
 
-    /*[DATA VISUALIZATION]: Return the statistics of Task.
-       Suggestion:
-        [] Create pie chart: Show visually visually the distribution of the Roles.
-        [] Icons indicates the status: Showing the total of Completeted, Pending, In Progress task. 
-    */
     @GetMapping("/statistics")
     public ResponseEntity<List<TaskStatisticsDTO>> getTaskStatistics() {
         List<TaskStatisticsDTO> taskStatistics = fetchDataService.getTaskStatistics();
         return ResponseEntity.ok(taskStatistics);
     }
 
-    /*[DATA VISUALIZATION]: Return the top 5 most active users. 
-       Suggestion:
-        [] A billboard: Show visually the ranking of the users.
-        [] Filters: Sort in descending order by
-                    (1) The total completed task.
-                    (2) The total task assigned to.
-                    (3) The percentage of task completed. 
-    */
     @GetMapping("/top5/{filterType}")
     public ResponseEntity<List<ActiveUserDTO>> getTop5UserWithMostTask(@PathVariable String filterType){
         List<ActiveUserDTO> activeUser = fetchDataService.getTop5UsersWithMostTasks(filterType); 
         return ResponseEntity.ok(activeUser);
     }
+
     // Helper method to convert TaskInterface to TaskDTO
     private TaskDTO convertToDTO(TaskInterface task) {
         TaskDTO dto = new TaskDTO();
@@ -173,5 +133,4 @@ public class TaskController {
         dto.setDeadline(task.getDeadline());
         return dto;
     }
->>>>>>> Stashed changes
 }
