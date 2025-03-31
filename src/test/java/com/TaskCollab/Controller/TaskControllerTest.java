@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.modelmapper.ModelMapper; // Added import
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -35,14 +36,18 @@ class TaskControllerTest {
     @InjectMocks
     private TaskController taskController;
 
-    // Mocks for TaskInterface
+    private ModelMapper modelMapper; // Added ModelMapper
+
     private TaskInterface mockTask;
 
     @BeforeEach
     void setUp() {
-        // Create a mock of TaskInterface so we can control getTask_Id(), etc.
+        modelMapper = new ModelMapper(); // Initialize ModelMapper
+        taskController.modelMapper = modelMapper; //Inject modelmapper into the controller.
+
         mockTask = mock(TaskInterface.class);
     }
+
 
     @Test
     void testGetTask_Found() {

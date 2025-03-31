@@ -57,7 +57,8 @@ public class UserController {
 
     // PUT update user role
     @PutMapping("/{id}/role")
-    public ResponseEntity<Users> updateUserRole(@PathVariable Long id, @RequestBody Role newRole) {
+    public ResponseEntity<Users> updateUserRole(@PathVariable Long id, @RequestBody String newRole) {
+        System.out.println("Updating role for user ID: " + id + " to role: " + newRole);
         Users updatedUser = userControllerService.updateUserRole(id, newRole);
         return (updatedUser != null) ? ResponseEntity.ok(updatedUser) : ResponseEntity.notFound().build();
     }

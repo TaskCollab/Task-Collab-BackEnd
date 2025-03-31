@@ -31,19 +31,17 @@ public class TaskController {
     private SearchService searchService;
 
 
-
     @Autowired
     private JwtProperties jwtProperties;
 
-    @Autowired
-    private ModelMapper modelMapper;
+    @Autowired ModelMapper modelMapper;
 
     // Configure ModelMapper for TaskInterface to TaskDTO mapping
-    @Autowired
-    public TaskController(ModelMapper modelMapper) {
-        this.modelMapper = modelMapper;
-        TypeMap<TaskInterface, TaskDTO> typeMap = modelMapper.createTypeMap(TaskInterface.class, TaskDTO.class);
-    }
+    // @Autowired
+    // public TaskController(ModelMapper modelMapper) {
+    //     this.modelMapper = modelMapper;
+    //     TypeMap<TaskInterface, TaskDTO> typeMap = modelMapper.createTypeMap(TaskInterface.class, TaskDTO.class);
+    // }
 
     @PostMapping("/search")
     public ResponseEntity<List<TaskDTO>> searchTasks(@RequestBody TaskDTO searchCriteria) {

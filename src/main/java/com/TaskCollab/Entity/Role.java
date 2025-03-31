@@ -1,5 +1,5 @@
 package com.TaskCollab.Entity;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.Set;
 
@@ -30,6 +30,7 @@ public class Role implements RoleInterface {
     @Column(nullable = false)
     private boolean updatePermission;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
     private Set<Users> users;
 

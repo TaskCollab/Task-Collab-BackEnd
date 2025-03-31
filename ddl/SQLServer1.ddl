@@ -26,7 +26,7 @@ CREATE TABLE Roles (
 
 
 CREATE TABLE Users (
-   user_Id BIGINT NOT NULL PRIMARY KEY,
+   user_Id BIGINT IDENTITY(101,1) NOT NULL PRIMARY KEY,
    username NVARCHAR(255) UNIQUE NOT NULL,
    password NVARCHAR(255) NOT NULL,
    role_Id INT NULL,        -- Changed from NOT NULL to NULL
@@ -103,10 +103,10 @@ INSERT INTO roles (role_Id, role_Name, create_permission, read_permission, delet
 (3, 'Employee', 0, 1, 0, 0);
 
 -- Insert users
-INSERT INTO Users (user_Id, username, password, role_Id, is_Admin) VALUES
-(101, 'admin_user', '$2a$12$yygN6MmF18cFsczAoCBGruND1ox2ct9AhkLFgMuT/rrIl1A.n8LRO', 1, 1), 
-(102, 'manager_user', 'hashedpassword2', 2, 0),
-(103, 'employee_user', 'hashedpassword3', 3, 0);
+INSERT INTO Users (username, password, role_Id, is_Admin) VALUES
+('admin_user', '$2a$12$yygN6MmF18cFsczAoCBGruND1ox2ct9AhkLFgMuT/rrIl1A.n8LRO', 1, 1), 
+('manager_user', 'hashedpassword2', 2, 0),
+('employee_user', 'hashedpassword3', 3, 0);
 
 -- Insert user roles (assuming users can have multiple roles)
 INSERT INTO user_roles (user_id, role_id) VALUES
