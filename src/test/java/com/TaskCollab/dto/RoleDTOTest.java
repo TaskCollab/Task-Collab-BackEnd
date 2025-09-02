@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
+//This is RoleDTO class testing the RoleDTO class.
 public class RoleDTOTest {
 
     @Test

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+//This is the LoggingRoleDecoratorTest class testing the LoggingRoleDecorator class.
 public class LoggingRoleDecoratorTest {
 
     // Capture System.out output

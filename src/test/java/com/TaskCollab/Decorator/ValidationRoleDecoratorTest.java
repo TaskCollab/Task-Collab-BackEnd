@@ -8,6 +8,8 @@ import com.TaskCollab.Entity.RoleInterface;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+// This is the ValidationRoleDecoratorTest class testing the ValidationRoleDecorator class.
+
 public class ValidationRoleDecoratorTest {
     
     private RoleInterface roleMock;
