@@ -15,4 +15,7 @@ public interface TaskInterface {
     void setStatus(String status);
     LocalDateTime getDeadline();
     void setDeadline(LocalDateTime deadline);
+
+    boolean isLocked();
+    void setLocked(boolean locked);
 }

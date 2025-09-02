@@ -52,6 +52,7 @@ CREATE TABLE Task (
    deadline DATETIME,
    FOREIGN KEY (assigned_To) REFERENCES Users(username) ON DELETE SET NULL
 );
+ALTER TABLE Task ADD locked BIT NOT NULL DEFAULT 0;
 
 CREATE TABLE Conversation (
    conversationId BIGINT NOT NULL PRIMARY KEY,
